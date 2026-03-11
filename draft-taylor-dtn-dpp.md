@@ -19,11 +19,11 @@
 # Change the file extension to match the format (.xml for XML, etc...)
 #
 ###
-title: "TODO - Your title"
-abbrev: "TODO - Abbreviation"
+title: "DTN Peering Protocol"
+abbrev: "DPP"
 category: info
 
-docname: draft-todo-yourname-protocol-latest
+docname: draft-taylor-dtn-dpp-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
