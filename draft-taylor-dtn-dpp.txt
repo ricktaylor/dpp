@@ -1017,8 +1017,8 @@ Table of Contents
    }
 
    message IpnPattern {
-     uint64 allocator_id = 1;
-     uint64 node_id = 2;
+     uint32 allocator_id = 1;
+     uint32 node_id = 2;
      bool is_wildcard = 3;
    }
 
