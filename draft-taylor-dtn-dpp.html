@@ -5,14 +5,26 @@
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
 <title>DTN Peering Protocol</title>
-<meta content="Your Name Here" name="author">
+<meta content="Rick Taylor" name="author">
 <meta content="
-       TODO Abstract 
+       This document specifies the DTN Peering Protocol (DPP), an inter-domain
+routing protocol for the Delay-Tolerant Networking (DTN) ecosystem. DPP
+facilitates the exchange of reachability information between distinct
+Administrative Domains (ADs), enabling inter-domain routing across the Solar
+System DTN. DPP separates the control plane from the data plane: a DPP
+speaker need not be a gateway that forwards bundles, allowing centralized
+route controllers or orchestration systems to participate in peering on
+behalf of the gateways they manage. 
+       DPP harmonizes the two DTN addressing schemes --  ipn  (integer-based) and
+ dtn  (URI-based) -- into a unified routing framework. It leverages DNS for
+identity verification and supports both reactive routing and scheduled
+contact windows for deep-space networks. 
     " name="description">
 <meta content="xml2rfc 3.31.0" name="generator">
-<meta content="next generation" name="keyword">
-<meta content="unicorn" name="keyword">
-<meta content="sparkling distributed ledger" name="keyword">
+<meta content="DTN" name="keyword">
+<meta content="peering" name="keyword">
+<meta content="routing" name="keyword">
+<meta content="delay-tolerant networking" name="keyword">
 <meta content="draft-taylor-dtn-dpp-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.31.0
@@ -1050,8 +1062,8 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <td class="right">March 2026</td>
 </tr></thead>
 <tfoot><tr>
-<td class="left">Here</td>
-<td class="center">Expires 12 September 2026</td>
+<td class="left">Taylor</td>
+<td class="center">Expires 13 September 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1059,22 +1071,22 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <div id="internal-metadata" class="document-information">
 <dl id="identifiers">
 <dt class="label-workgroup">Workgroup:</dt>
-<dd class="workgroup">WG Working Group</dd>
+<dd class="workgroup">Delay/Disruption Tolerant Networking</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
 <dd class="internet-draft">draft-taylor-dtn-dpp-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-03-11" class="published">11 March 2026</time>
+<time datetime="2026-03-12" class="published">12 March 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
-<dd class="intended-status">Informational</dd>
+<dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-09-12">12 September 2026</time></dd>
+<dd class="expires"><time datetime="2026-09-13">13 September 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
-      <div class="author-name">Y. N. Here</div>
-<div class="org">Your Organization Here</div>
+      <div class="author-name">R. Taylor</div>
+<div class="org">Aalyria Technologies</div>
 </div>
 </dd>
 </dl>
@@ -1082,7 +1094,18 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <h1 id="title">DTN Peering Protocol</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">TODO Abstract<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document specifies the DTN Peering Protocol (DPP), an inter-domain
+routing protocol for the Delay-Tolerant Networking (DTN) ecosystem. DPP
+facilitates the exchange of reachability information between distinct
+Administrative Domains (ADs), enabling inter-domain routing across the Solar
+System DTN. DPP separates the control plane from the data plane: a DPP
+speaker need not be a gateway that forwards bundles, allowing centralized
+route controllers or orchestration systems to participate in peering on
+behalf of the gateways they manage.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">DPP harmonizes the two DTN addressing schemes -- <code>ipn</code> (integer-based) and
+<code>dtn</code> (URI-based) -- into a unified routing framework. It leverages DNS for
+identity verification and supports both reactive routing and scheduled
+contact windows for deep-space networks.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1090,14 +1113,15 @@ svg :is([fill="white"], [fill^="#fff"]) {
       </h2>
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
-        The latest revision of this draft can be found at <span><a href="https://example.com/LATEST">https://example.com/LATEST</a></span>.
+        The latest revision of this draft can be found at <span><a href="https://ricktaylor.github.io/dpp/draft-taylor-dtn-dpp.html">https://ricktaylor.github.io/dpp/draft-taylor-dtn-dpp.html</a></span>.
         Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-taylor-dtn-dpp/">https://datatracker.ietf.org/doc/draft-taylor-dtn-dpp/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">
         Discussion of this document takes place on the
-        WG Working Group mailing list (<span><a href="mailto:WG@example.com">mailto:WG@example.com</a></span>),
-        which is archived at <span><a href="https://example.com/WG">https://example.com/WG</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+        Delay/Disruption Tolerant Networking Working Group mailing list (<span><a href="mailto:dtn@ietf.org">mailto:dtn@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/dtn/">https://mailarchive.ietf.org/arch/browse/dtn/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/dtn/">https://www.ietf.org/mailman/listinfo/dtn/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
 <p id="section-note.1-4">Source for this draft and an issue tracker can be found at
-        <span><a href="https://github.com/USER/REPO">https://github.com/USER/REPO</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+        <span><a href="https://github.com/ricktaylor/dpp">https://github.com/ricktaylor/dpp</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1118,7 +1142,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 12 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 13 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1148,25 +1172,218 @@ svg :is([fill="white"], [fill^="#fff"]) {
         </h2>
 <nav class="toc"><ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
-            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+            <p id="section-toc.1-1.1.1"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-motivation" class="internal xref">Motivation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-design-principles" class="internal xref">Design Principles</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="#section-1.3" class="auto internal xref">1.3</a>.  <a href="#name-scope" class="internal xref">Scope</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-terminology" class="internal xref">Conventions and Terminology</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-definitions" class="internal xref">Definitions</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-on-the-use-of-dns" class="internal xref">On the Use of DNS</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-architecture-overview" class="internal xref">Architecture Overview</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-administrative-domains" class="internal xref">Administrative Domains</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-dpp-speakers-and-gateways" class="internal xref">DPP Speakers and Gateways</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
-            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-addressing-and-metrics" class="internal xref">Addressing and Metrics</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-eid-pattern-constraints-mon" class="internal xref">EID Pattern Constraints (Monotonic Specificity)</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.1">
+                    <p id="section-toc.1-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="auto internal xref">4.1.1</a>.  <a href="#name-ipn-scheme-constraints-left" class="internal xref">IPN Scheme Constraints (Left-to-Right Hierarchy)</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.2">
+                    <p id="section-toc.1-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="auto internal xref">4.1.2</a>.  <a href="#name-dtn-scheme-constraints-righ" class="internal xref">DTN Scheme Constraints (Right-to-Left Hierarchy)</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.3">
+                    <p id="section-toc.1-1.4.2.1.2.3.1"><a href="#section-4.1.3" class="auto internal xref">4.1.3</a>.  <a href="#name-single-wildcard-constraint" class="internal xref">Single Wildcard Constraint</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-specificity-scoring" class="internal xref">Specificity Scoring</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.1">
+                    <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="auto internal xref">4.2.1</a>.  <a href="#name-dtn-scheme-scoring" class="internal xref">DTN Scheme Scoring</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.2">
+                    <p id="section-toc.1-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="auto internal xref">4.2.2</a>.  <a href="#name-ipn-scheme-scoring" class="internal xref">IPN Scheme Scoring</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-the-metric-field" class="internal xref">The Metric Field</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-route-selection-algorithm" class="internal xref">Route Selection Algorithm</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-trust-and-verification-mode" class="internal xref">Trust and Verification Model</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-the-_dtn_domain-svcb-record" class="internal xref">The _dtn_domain SVCB Record</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.1">
+                    <p id="section-toc.1-1.5.2.1.2.1.1"><a href="#section-5.1.1" class="auto internal xref">5.1.1</a>.  <a href="#name-multiple-dpp-speakers-per-a" class="internal xref">Multiple DPP Speakers per AD</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.2">
+                    <p id="section-toc.1-1.5.2.1.2.2.1"><a href="#section-5.1.2" class="auto internal xref">5.1.2</a>.  <a href="#name-alignment-with-cl-discovery" class="internal xref">Alignment with CL Discovery</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.3">
+                    <p id="section-toc.1-1.5.2.1.2.3.1"><a href="#section-5.1.3" class="auto internal xref">5.1.3</a>.  <a href="#name-alternative-approaches-work" class="internal xref">Alternative Approaches (Working Group Note)</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-handshake-and-verification-" class="internal xref">Handshake and Verification Flow</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-loop-detection" class="internal xref">Loop Detection</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-route-attributes-and-advert" class="internal xref">Route Attributes and Advertisements</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-advertisement-structure" class="internal xref">Advertisement Structure</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-path-attributes" class="internal xref">Path Attributes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-extensible-attributes" class="internal xref">Extensible Attributes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-forward-compatibility" class="internal xref">Forward Compatibility</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
+                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-time-variant-routing" class="internal xref">Time-Variant Routing</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.6">
+                <p id="section-toc.1-1.6.2.6.1"><a href="#section-6.6" class="auto internal xref">6.6</a>.  <a href="#name-route-withdrawal" class="internal xref">Route Withdrawal</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.7">
+                <p id="section-toc.1-1.6.2.7.1"><a href="#section-6.7" class="auto internal xref">6.7</a>.  <a href="#name-gateway-eid-resolution" class="internal xref">Gateway EID Resolution</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-protocol-definition" class="internal xref">Protocol Definition</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-service-definition" class="internal xref">Service Definition</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-message-envelope" class="internal xref">Message Envelope</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-identity-and-authentication" class="internal xref">Identity and Authentication Messages</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-routing-messages" class="internal xref">Routing Messages</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.5">
+                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-route-attributes" class="internal xref">Route Attributes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.6">
+                <p id="section-toc.1-1.7.2.6.1"><a href="#section-7.6" class="auto internal xref">7.6</a>.  <a href="#name-data-types" class="internal xref">Data Types</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.7">
+                <p id="section-toc.1-1.7.2.7.1"><a href="#section-7.7" class="auto internal xref">7.7</a>.  <a href="#name-control-messages" class="internal xref">Control Messages</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-operational-state-machine" class="internal xref">Operational State Machine</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-states" class="internal xref">States</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-keepalive-requirements" class="internal xref">Keepalive Requirements</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-error-handling" class="internal xref">Error Handling</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-identity-verification" class="internal xref">Identity Verification</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-transport-security" class="internal xref">Transport Security</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-route-injection-attacks" class="internal xref">Route Injection Attacks</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-denial-of-service" class="internal xref">Denial of Service</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.5">
+                <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-svcb-svcparamkeys" class="internal xref">SVCB SvcParamKeys</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-underscore-prefixed-dns-nam" class="internal xref">Underscore-Prefixed DNS Name</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="#section-10.3" class="auto internal xref">10.3</a>.  <a href="#name-future-considerations" class="internal xref">Future Considerations</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
+                <p id="section-toc.1-1.11.2.1.1"><a href="#section-11.1" class="auto internal xref">11.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
+                <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2" class="auto internal xref">11.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1177,51 +1394,1761 @@ svg :is([fill="white"], [fill^="#fff"]) {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">TODO Introduction<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-1">The DTN Peering Protocol (DPP) is designed for the exchange of reachability
+information between distinct Administrative Domains in Delay-Tolerant Networks.
+It functions as the inter-domain routing protocol for the Solar System DTN,
+analogous to BGP's role in the Internet.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<div id="motivation">
+<section id="section-1.1">
+        <h3 id="name-motivation">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-motivation" class="section-name selfRef">Motivation</a>
+        </h3>
+<p id="section-1.1-1">Two DPP speakers establish a session to exchange reachability information
+across administrative boundaries. Common scenarios include:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-1.1-2">
+          <dt id="section-1.1-2.1">Inter-Agency Connectivity:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.2">
+            <p id="section-1.1-2.2.1">NASA's Deep Space Network and ESA's ESTRACK operate independent DTN
+infrastructures. DPP allows their border gateways to advertise which
+spacecraft and ground stations are reachable through each network, enabling
+bundles to flow between agencies.<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.3">Commercial-Government Integration:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.4">
+            <p id="section-1.1-2.4.1">A commercial satellite operator peers with a government science network. DPP
+enables the commercial network to advertise transit capacity to deep-space
+assets, while the science network advertises its spacecraft endpoints.<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.5">Redundant Path Discovery:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.6">
+            <p id="section-1.1-2.6.1">A Mars relay satellite is reachable via two ground station complexes. DPP
+allows both paths to be advertised with appropriate metrics, enabling the
+network to prefer one path while maintaining the other as backup.<a href="#section-1.1-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.7">Scheduled Contact Windows:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.8">
+            <p id="section-1.1-2.8.1">Deep-space links are available only during planned contact windows. DPP's
+time-variant routing attributes allow DPP speakers to advertise future
+connectivity, enabling proactive bundle scheduling.<a href="#section-1.1-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.9">Scalable Contact Graph Routing:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.10">
+            <p id="section-1.1-2.10.1">Contact Graph Routing (CGR) algorithms compute optimal bundle forwarding
+based on predicted contact schedules. However, CGR complexity grows with
+network size, and a single global contact graph spanning all agencies,
+spacecraft, and ground stations is neither practical nor desirable -- each
+organization maintains its own mission planning systems and contact
+schedules. DPP provides the inter-domain routing layer that connects
+independent CGR domains. Each Administrative Domain runs its own CGR
+internally, while DPP speakers advertise summarized reachability (with
+optional time windows) to peers. This decouples internal scheduling
+complexity from external routing, allowing the Solar System DTN to scale
+without requiring a single coordinated contact plan.<a href="#section-1.1-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-1.1-3">Without DPP, each network would require manual configuration of routes to
+external destinations -- an approach that does not scale as the Solar System
+DTN grows.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="conventions-and-definitions">
+<div id="design-principles">
+<section id="section-1.2">
+        <h3 id="name-design-principles">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-design-principles" class="section-name selfRef">Design Principles</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="section-1.2-1">
+          <dt id="section-1.2-1.1">Transport Agnostic:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-1.2">
+            <p id="section-1.2-1.2.1">Defined via Protocol Buffers (gRPC) to run over any reliable transport
+(TCP/IP, QUIC).<a href="#section-1.2-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-1.3">Unified Routing:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-1.4">
+            <p id="section-1.2-1.4.1">Harmonizes <code>ipn</code> and <code>dtn</code> schemes into a single routing table (FIB).<a href="#section-1.2-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-1.5">DNS-Rooted Identity:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-1.6">
+            <p id="section-1.2-1.6.1">Uses standard DNS domains as Administrative Domain identifiers.<a href="#section-1.2-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-1.7">Decoupled Trust:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-1.8">
+            <p id="section-1.2-1.8.1">Separates "Who I am" (AD Identity) from "What I route" (Allocators/Names).<a href="#section-1.2-1.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="scope">
+<section id="section-1.3">
+        <h3 id="name-scope">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-scope" class="section-name selfRef">Scope</a>
+        </h3>
+<p id="section-1.3-1">This specification defines the protocol messages, state machine, and
+operational requirements for DPP implementations. It does not define:<a href="#section-1.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.3-2.1">
+            <p id="section-1.3-2.1.1">Internal routing within an Administrative Domain<a href="#section-1.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-2.2">
+            <p id="section-1.3-2.2.1">Bundle forwarding algorithms (e.g., CGR)<a href="#section-1.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-2.3">
+            <p id="section-1.3-2.3.1">Transport layer security beyond identity verification<a href="#section-1.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-2.4">
+            <p id="section-1.3-2.4.1">Policy languages for route filtering<a href="#section-1.3-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-terminology">
 <section id="section-2">
-      <h2 id="name-conventions-and-definitions">
-<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      <h2 id="name-conventions-and-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-terminology" class="section-name selfRef">Conventions and Terminology</a>
       </h2>
 <p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
 "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<div id="definitions">
+<section id="section-2.1">
+        <h3 id="name-definitions">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-definitions" class="section-name selfRef">Definitions</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="section-2.1-1">
+          <dt id="section-2.1-1.1">Administrative Domain (AD):</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.2">
+            <p id="section-2.1-1.2.1">An autonomous unit of routing control identified by a DNS domain name.
+Examples include agency networks (e.g., <code>dsn.example.org</code>), commercial
+providers, or research institutions.<a href="#section-2.1-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-1.3">DPP Speaker:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.4">
+            <p id="section-2.1-1.4.1">An entity that participates in the DPP protocol, maintaining peering
+sessions with other DPP speakers and exchanging route information on behalf
+of an Administrative Domain. A DPP speaker may be a gateway, a centralized
+route controller, or any other system authorized to advertise and receive
+routes for its AD.<a href="#section-2.1-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-1.5">Gateway:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.6">
+            <p id="section-2.1-1.6.1">A border node within an Administrative Domain that forwards bundles to
+other ADs. A gateway may or may not also be a DPP speaker. When a DPP
+speaker is not itself a gateway, it uses the <code>gateway_eid</code> attribute
+(see <a href="#gateway-eid-resolution" class="auto internal xref">Section 6.7</a>) to direct traffic to the appropriate
+gateway.<a href="#section-2.1-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-1.7">EID Pattern:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.8">
+            <p id="section-2.1-1.8.1">A pattern matching one or more Bundle Protocol <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span> Endpoint
+Identifiers, as defined in <span>[<a href="#I-D.ietf-dtn-eid-pattern" class="cite xref">I-D.ietf-dtn-eid-pattern</a>]</span>.<a href="#section-2.1-1.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-1.9">Forwarding Information Base (FIB):</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.10">
+            <p id="section-2.1-1.10.1">The consolidated routing table used by a gateway to forward bundles.<a href="#section-2.1-1.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-1.11">Metric:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.12">
+            <p id="section-2.1-1.12.1">A numeric value expressing route preference, analogous to BGP's Multi-Exit
+Discriminator (MED).<a href="#section-2.1-1.12.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-1.13">AD_PATH:</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.14">
+            <p id="section-2.1-1.14.1">An ordered list of Administrative Domains that a route advertisement has
+traversed, used for loop detection.<a href="#section-2.1-1.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="on-the-use-of-dns">
+<section id="section-2.2">
+        <h3 id="name-on-the-use-of-dns">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-on-the-use-of-dns" class="section-name selfRef">On the Use of DNS</a>
+        </h3>
+<p id="section-2.2-1">Readers familiar with deep-space networking may question the reliance on DNS,
+given that DNS is not deployed on spacecraft and requires low-latency
+connectivity. This concern, while understandable, misses the architectural
+context:<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2.2-2">
+          <dt id="section-2.2-2.1">DPP speakers are ground infrastructure.</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-2.2">
+            <p id="section-2.2-2.2.1">DPP operates at administrative boundaries. DPP speakers are ground stations,
+mission control centers, network operations facilities, or centralized route
+controllers -- all of which have reliable Internet connectivity and can
+perform DNS lookups in milliseconds. Gateways, by contrast, are the
+forwarding nodes that handle bundle traffic and may be located anywhere --
+including on spacecraft or relay satellites -- since they do not need DNS
+access or direct participation in DPP.<a href="#section-2.2-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-2.3">DNS is used for authentication, not routing.</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-2.4">
+            <p id="section-2.2-2.4.1">DNS lookups occur only during session establishment (the handshake phase) to
+retrieve the peer's public key for identity verification. Once a session is
+established, no further DNS queries are required. Route advertisements and
+withdrawals flow over the established session without DNS involvement.<a href="#section-2.2-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.2-2.5">Spacecraft do not run DPP.</dt>
+          <dd style="margin-left: 1.5em" id="section-2.2-2.6">
+            <p id="section-2.2-2.6.1">Spacecraft run the Bundle Protocol and may use CGR or static routing for
+internal forwarding decisions. They receive forwarding instructions from their
+ground-based mission operations, which participate in DPP on their behalf.
+The spacecraft need not know about Administrative Domains or DNS. However,
+spacecraft and relay satellites <span class="bcp14">MAY</span> serve as gateways -- forwarding bundles
+between Administrative Domains -- without participating in DPP directly.
+A ground-based DPP speaker advertises routes on their behalf using the
+<code>gateway_eid</code> attribute to identify the in-space forwarding node.<a href="#section-2.2-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-2.2-3">This architecture mirrors the Internet: BGP routers require IP connectivity to
+establish sessions, but the end hosts they route traffic for need not
+understand BGP. Similarly, DPP speakers require DNS access, but the spacecraft
+and sensors they route bundles for need not understand DPP.<a href="#section-2.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="architecture-overview">
+<section id="section-3">
+      <h2 id="name-architecture-overview">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-architecture-overview" class="section-name selfRef">Architecture Overview</a>
+      </h2>
+<div id="administrative-domains">
+<section id="section-3.1">
+        <h3 id="name-administrative-domains">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-administrative-domains" class="section-name selfRef">Administrative Domains</a>
+        </h3>
+<p id="section-3.1-1">An Administrative Domain is an autonomous unit of routing control.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-3.1-2">
+          <dt id="section-3.1-2.1">Identity:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.2">
+            <p id="section-3.1-2.2.1">An AD is identified solely by a DNS domain name (e.g., <code>dsn.example.org</code>).<a href="#section-3.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.1-2.3">Independence:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.1-2.4">
+            <p id="section-3.1-2.4.1">An AD Identity is distinct from the resources it advertises. An AD named
+<code>dsn.example.org</code> may advertise <code>ipn:100</code> and <code>dtn://rover1.example.org</code>.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="dpp-speakers-and-gateways">
+<section id="section-3.2">
+        <h3 id="name-dpp-speakers-and-gateways">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-dpp-speakers-and-gateways" class="section-name selfRef">DPP Speakers and Gateways</a>
+        </h3>
+<p id="section-3.2-1">DPP speakers and gateways are defined in <a href="#definitions" class="auto internal xref">Section 2.1</a>. A DPP speaker and
+a gateway <span class="bcp14">MAY</span> be the same node, but they need not be. For example, a
+centralized route controller may run DPP sessions on behalf of multiple
+gateways within its AD, using the <code>gateway_eid</code> attribute to direct traffic
+to the appropriate forwarding node. This separation of the control plane
+(DPP) from the data plane (bundle forwarding) allows flexible deployment
+topologies.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">An Administrative Domain <span class="bcp14">MAY</span> deploy multiple DPP speakers, each maintaining
+independent peering sessions with external ADs. Because loop detection
+operates on the AD identity (the <code>local_ad_id</code> in the AD_PATH) rather than
+on individual speaker identity, multiple speakers within the same AD do not
+introduce routing loops (see <a href="#loop-detection" class="auto internal xref">Section 5.3</a>).<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="addressing-and-metrics">
+<section id="section-4">
+      <h2 id="name-addressing-and-metrics">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-addressing-and-metrics" class="section-name selfRef">Addressing and Metrics</a>
+      </h2>
+<p id="section-4-1">DPP introduces a Harmonized Specificity Score to allow integer-based <code>ipn</code>
+patterns and string-based <code>dtn</code> patterns to coexist in a single routing
+decision process.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="eid-pattern-constraints-monotonic-specificity">
+<section id="section-4.1">
+        <h3 id="name-eid-pattern-constraints-mon">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-eid-pattern-constraints-mon" class="section-name selfRef">EID Pattern Constraints (Monotonic Specificity)</a>
+        </h3>
+<p id="section-4.1-1">To ensure efficient FIB lookups and O(1) specificity scoring, DPP restricts the
+generic EID patterns defined in <span>[<a href="#I-D.ietf-dtn-eid-pattern" class="cite xref">I-D.ietf-dtn-eid-pattern</a>]</span> to a Strict
+Monotonic Subset.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">A pattern exhibits monotonic specificity if all wildcard components are confined
+to the logical "leaves" of the naming hierarchy. A specific child component
+cannot exist under a wildcard parent.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<div id="ipn-scheme-constraints-left-to-right-hierarchy">
+<section id="section-4.1.1">
+          <h4 id="name-ipn-scheme-constraints-left">
+<a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-ipn-scheme-constraints-left" class="section-name selfRef">IPN Scheme Constraints (Left-to-Right Hierarchy)</a>
+          </h4>
+<p id="section-4.1.1-1">The <code>ipn</code> scheme hierarchy is defined as Allocator -&gt; Node.<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1.1-2.1">
+              <p id="section-4.1.1-2.1.1">Wildcards or ranges are only permitted in the Node number if the Allocator
+is specific.<a href="#section-4.1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.1.1-2.2">
+              <p id="section-4.1.1-2.2.1">Valid: <code>ipn:100.1</code> (Specific), <code>ipn:100.*</code> (Monotonic).<a href="#section-4.1.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.1.1-2.3">
+              <p id="section-4.1.1-2.3.1">Invalid: <code>ipn:*.1</code>, <code>ipn:[100-200].1</code> (Specific Node under Wildcard
+Allocator).<a href="#section-4.1.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="dtn-scheme-constraints-right-to-left-hierarchy">
+<section id="section-4.1.2">
+          <h4 id="name-dtn-scheme-constraints-righ">
+<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-dtn-scheme-constraints-righ" class="section-name selfRef">DTN Scheme Constraints (Right-to-Left Hierarchy)</a>
+          </h4>
+<p id="section-4.1.2-1">The <code>dtn</code> scheme hierarchy follows standard DNS rules: TLD &lt;- Domain &lt;- Host.<a href="#section-4.1.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1.2-2.1">
+              <p id="section-4.1.2-2.1.1">Wildcards are only permitted in the left-most label (the Host or lowest
+subdomain).<a href="#section-4.1.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.1.2-2.2">
+              <p id="section-4.1.2-2.2.1">Valid: <code>dtn://rover1.example.org</code> (Exact), <code>dtn://*.example.org</code> (Wildcard
+Host), <code>dtn://rover*.example.org</code> (Partial Host).<a href="#section-4.1.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.1.2-2.3">
+              <p id="section-4.1.2-2.3.1">Invalid: <code>dtn://rover1.*.example.org</code> (Specific Child under Wildcard Parent).<a href="#section-4.1.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="single-wildcard-constraint">
+<section id="section-4.1.3">
+          <h4 id="name-single-wildcard-constraint">
+<a href="#section-4.1.3" class="section-number selfRef">4.1.3. </a><a href="#name-single-wildcard-constraint" class="section-name selfRef">Single Wildcard Constraint</a>
+          </h4>
+<p id="section-4.1.3-1">To support the simplified specificity metric, a pattern <span class="bcp14">MUST</span> contain at most
+one wildcard character (<code>*</code>).<a href="#section-4.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.3-2">Complex globs (e.g., <code>dtn://r*v*r.example.org</code>) <span class="bcp14">MUST NOT</span> be used.<a href="#section-4.1.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="specificity-scoring">
+<section id="section-4.2">
+        <h3 id="name-specificity-scoring">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-specificity-scoring" class="section-name selfRef">Specificity Scoring</a>
+        </h3>
+<p id="section-4.2-1">The specificity score prioritizes Exact Matches over Wildcards, and Longer
+Prefixes over Shorter Prefixes.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-4.2-2.1">
+            <p id="section-4.2-2.1.1">The specificity score is computed locally by the receiver from the EidPattern.
+It is NOT transmitted in route advertisements, as it can be deterministically
+derived from the pattern itself.<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.2-3">The score is calculated as a <code>uint32</code>:<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.2-4">
+<pre>
+Score = (IsExact x 256) + LiteralLength
+</pre><a href="#section-4.2-4" class="pilcrow">¶</a>
+</div>
+<span class="break"></span><dl class="dlParallel" id="section-4.2-5">
+          <dt id="section-4.2-5.1">IsExact (0 or 1):</dt>
+          <dd style="margin-left: 1.5em" id="section-4.2-5.2">
+            <p id="section-4.2-5.2.1">1 if the pattern contains NO wildcards; 0 otherwise.<a href="#section-4.2-5.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.2-5.3">Multiplier (256):</dt>
+          <dd style="margin-left: 1.5em" id="section-4.2-5.4">
+            <p id="section-4.2-5.4.1">A weight ensuring any Exact Match outranks any Wildcard Match (assuming max
+literal length &lt; 256).<a href="#section-4.2-5.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.2-5.5">LiteralLength:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.2-5.6">
+            <p id="section-4.2-5.6.1">The count of non-wildcard characters (or equivalent bits for integers).<a href="#section-4.2-5.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<div id="dtn-scheme-scoring">
+<section id="section-4.2.1">
+          <h4 id="name-dtn-scheme-scoring">
+<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-dtn-scheme-scoring" class="section-name selfRef">DTN Scheme Scoring</a>
+          </h4>
+<p id="section-4.2.1-1">For <code>dtn</code> URIs, LiteralLength is the count of characters in the Authority
+string excluding the wildcard.<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+            <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Pattern</th>
+                <th class="text-left" rowspan="1" colspan="1">Characters</th>
+                <th class="text-left" rowspan="1" colspan="1">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>dtn://rover1.example.org</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">18 (exact)</td>
+                <td class="text-left" rowspan="1" colspan="1">274</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>dtn://rover*.example.org</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">17 (wildcard)</td>
+                <td class="text-left" rowspan="1" colspan="1">17</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+<div id="ipn-scheme-scoring">
+<section id="section-4.2.2">
+          <h4 id="name-ipn-scheme-scoring">
+<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-ipn-scheme-scoring" class="section-name selfRef">IPN Scheme Scoring</a>
+          </h4>
+<p id="section-4.2.2-1">For <code>ipn</code> EIDs, LiteralLength represents the "Effective Bit Depth" of the
+pattern. The IPN address space is treated as a 64-bit virtual integer, split
+logically into a 32-bit Allocator and a 32-bit Node.<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.2.2-2">
+<pre>
+LiteralLength = Bits_Allocator + Bits_Node
+</pre><a href="#section-4.2.2-2" class="pilcrow">¶</a>
+</div>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.2-3">
+<li id="section-4.2.2-3.1">
+              <p id="section-4.2.2-3.1.1">Allocator Part (Bits 63-32):<a href="#section-4.2.2-3.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2.2-3.1.2.1">
+                  <p id="section-4.2.2-3.1.2.1.1">Specific Allocator (e.g., <code>100</code>): 32 bits.<a href="#section-4.2.2-3.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-4.2.2-3.1.2.2">
+                  <p id="section-4.2.2-3.1.2.2.1">Wildcard Allocator (<code>*</code>): 0 bits.<a href="#section-4.2.2-3.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
+</li>
+            <li id="section-4.2.2-3.2">
+              <p id="section-4.2.2-3.2.1">Node Part (Bits 31-0):<a href="#section-4.2.2-3.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2.2-3.2.2.1">
+                  <p id="section-4.2.2-3.2.2.1.1">Specific Node (e.g., <code>.1</code>): 32 bits.<a href="#section-4.2.2-3.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-4.2.2-3.2.2.2">
+                  <p id="section-4.2.2-3.2.2.2.1">Wildcard Node (<code>.*</code>): 0 bits.<a href="#section-4.2.2-3.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-4.2.2-3.2.2.3">
+                  <p id="section-4.2.2-3.2.2.3.1">Range <code>.[min-max]</code>: 32 - ceil(log2(Count)) bits.<a href="#section-4.2.2-3.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
+</li>
+          </ol>
+<table class="center" id="table-2">
+            <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">IPN Pattern</th>
+                <th class="text-left" rowspan="1" colspan="1">Classification</th>
+                <th class="text-left" rowspan="1" colspan="1">IsExact</th>
+                <th class="text-left" rowspan="1" colspan="1">LiteralLength</th>
+                <th class="text-left" rowspan="1" colspan="1">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>ipn:100.1</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Specific Node</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">64</td>
+                <td class="text-left" rowspan="1" colspan="1">320</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>ipn:100.*</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Allocator Wildcard</td>
+                <td class="text-left" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">32</td>
+                <td class="text-left" rowspan="1" colspan="1">32</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>ipn:100.[10-13]</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Node Range (Size 4)</td>
+                <td class="text-left" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">62</td>
+                <td class="text-left" rowspan="1" colspan="1">62</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>ipn:*</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Default Route</td>
+                <td class="text-left" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">0</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+</section>
+</div>
+<div id="the-metric-field">
+<section id="section-4.3">
+        <h3 id="name-the-metric-field">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-the-metric-field" class="section-name selfRef">The Metric Field</a>
+        </h3>
+<p id="section-4.3-1">The <code>metric</code> field in route advertisements is analogous to BGP's Multi-Exit
+Discriminator (MED) <span>[<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>. It allows an Administrative Domain to express
+a preference for how traffic should enter its network when multiple paths
+exist.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2">For example:<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3-3">
+<pre>
+Organization B has two DPP speakers peering with Organization A:
+  - Speaker in Europe  (gateway with high latency to Mars relay)
+  - Speaker in Australia (gateway with low latency to Mars relay)
+
+Organization B advertises routes to ipn:200.* via both speakers:
+  - Europe speaker:    metric = 100
+  - Australia speaker: metric = 10
+
+Organization A, having learned the same route from both peers,
+prefers the lower metric and routes traffic via Australia.
+</pre><a href="#section-4.3-3" class="pilcrow">¶</a>
+</div>
+<table class="center" id="table-3">
+          <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Property</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Direction</td>
+              <td class="text-left" rowspan="1" colspan="1">Controls incoming traffic (traffic TO your AD)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Scope</td>
+              <td class="text-left" rowspan="1" colspan="1">Only compared between routes from the SAME origin AD</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Default</td>
+              <td class="text-left" rowspan="1" colspan="1">Lower metric = more preferred</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Use Cases</td>
+              <td class="text-left" rowspan="1" colspan="1">Capacity balancing, latency optimization, cost management</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-4.3-5">The metric is set by the originating AD and propagated unchanged through
+intermediate ADs. It provides a policy knob for traffic engineering without
+requiring coordination between ADs.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="route-selection-algorithm">
+<section id="section-4.4">
+        <h3 id="name-route-selection-algorithm">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-route-selection-algorithm" class="section-name selfRef">Route Selection Algorithm</a>
+        </h3>
+<p id="section-4.4-1">When a DPP speaker receives multiple routes to the same destination, it <span class="bcp14">MUST</span>
+select the Best Path using the following tie-breaking order:<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.4-2">
+<li id="section-4.4-2.1">
+            <p id="section-4.4-2.1.1">Highest Specificity Score: Prefer <code>rover1</code> over <code>rover*</code>. (Computed
+locally from the EidPattern.)<a href="#section-4.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.4-2.2">
+            <p id="section-4.4-2.2.1">Shortest AD_PATH: Prefer 1 hop over 3 hops.<a href="#section-4.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.4-2.3">
+            <p id="section-4.4-2.3.1">Lowest Metric: Administrator preference, analogous to BGP MED.<a href="#section-4.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.4-2.4">
+            <p id="section-4.4-2.4.1">Oldest Route: Stability preference.<a href="#section-4.4-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.4-3">A DPP speaker <span class="bcp14">MAY</span> implement additional local policy that overrides this order,
+but such policy is outside the scope of this specification.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="trust-and-verification-model">
+<section id="section-5">
+      <h2 id="name-trust-and-verification-mode">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-trust-and-verification-mode" class="section-name selfRef">Trust and Verification Model</a>
+      </h2>
+<p id="section-5-1">DPP leverages DNS as the root of trust for Administrative Domain identities,
+utilizing a "Check-and-Challenge" mechanism.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="the-dtndomain-svcb-record">
+<section id="section-5.1">
+        <h3 id="name-the-_dtn_domain-svcb-record">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-the-_dtn_domain-svcb-record" class="section-name selfRef">The _dtn_domain SVCB Record</a>
+        </h3>
+<p id="section-5.1-1">To prove ownership of an AD Identity (e.g., <code>dsn.example.org</code>), the
+administrator <span class="bcp14">MUST</span> publish one or more SVCB records <span>[<a href="#RFC9460" class="cite xref">RFC9460</a>]</span> at
+<code>_dtn_domain.&lt;AD-Domain&gt;</code>.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">The <code>_dtn_domain</code> prefix is chosen to reserve the broader <code>_dtn</code> namespace
+for future transport-specific uses (e.g., convergence layer discovery).<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">Record format:<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1-4">
+<pre>
+_dtn_domain.&lt;AD-Domain&gt;.  IN  SVCB  &lt;priority&gt; &lt;target&gt; &lt;params&gt;
+</pre><a href="#section-5.1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-5.1-5">Required SvcParams:<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+<table class="center" id="table-4">
+          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Parameter</th>
+              <th class="text-left" rowspan="1" colspan="1">Key ID</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>dtn-alg</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">TBD</td>
+              <td class="text-left" rowspan="1" colspan="1">Signature algorithm (e.g., <code>ed25519</code>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>dtn-pubkey</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">TBD</td>
+              <td class="text-left" rowspan="1" colspan="1">Base64-encoded public key</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-5.1-7">Optional SvcParams:<a href="#section-5.1-7" class="pilcrow">¶</a></p>
+<table class="center" id="table-5">
+          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Parameter</th>
+              <th class="text-left" rowspan="1" colspan="1">Key ID</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>alpn</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Application protocols (e.g., <code>dpp</code>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>port</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">3</td>
+              <td class="text-left" rowspan="1" colspan="1">DPP service port</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ipv4hint</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">4</td>
+              <td class="text-left" rowspan="1" colspan="1">IPv4 address hints</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ipv6hint</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">6</td>
+              <td class="text-left" rowspan="1" colspan="1">IPv6 address hints</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-5.1-9">Example:<a href="#section-5.1-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1-10">
+<pre>
+_dtn_domain.dsn.example.org.  IN  SVCB  1 . (
+    dtn-alg=ed25519
+    dtn-pubkey=MCowBQYDK2VwAyEAGb9... )
+</pre><a href="#section-5.1-10" class="pilcrow">¶</a>
+</div>
+<p id="section-5.1-11">An SVCB record with target "." indicates the service is available at the AD
+domain itself. Alternatively, the target <span class="bcp14">MAY</span> specify a different hostname:<a href="#section-5.1-11" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1-12">
+<pre>
+_dtn_domain.dsn.example.org.  IN  SVCB  1 gateway.dsn.example.org. (
+    dtn-alg=ed25519
+    dtn-pubkey=MCowBQYDK2VwAyEAGb9...
+    port=4556 )
+</pre><a href="#section-5.1-12" class="pilcrow">¶</a>
+</div>
+<p id="section-5.1-13">Implementations <span class="bcp14">MUST</span> support the <code>ed25519</code> algorithm. Implementations <span class="bcp14">MAY</span>
+support additional algorithms.<a href="#section-5.1-13" class="pilcrow">¶</a></p>
+<div id="multiple-dpp-speakers-per-ad">
+<section id="section-5.1.1">
+          <h4 id="name-multiple-dpp-speakers-per-a">
+<a href="#section-5.1.1" class="section-number selfRef">5.1.1. </a><a href="#name-multiple-dpp-speakers-per-a" class="section-name selfRef">Multiple DPP Speakers per AD</a>
+          </h4>
+<p id="section-5.1.1-1">An Administrative Domain that deploys multiple DPP speakers has two options
+for key management:<a href="#section-5.1.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.1.1-2">
+            <dt id="section-5.1.1-2.1">Shared key:</dt>
+            <dd style="margin-left: 1.5em" id="section-5.1.1-2.2">
+              <p id="section-5.1.1-2.2.1">All speakers share a single key pair. The AD publishes one SVCB record and
+distributes the private key to each speaker. This is operationally simple
+but means that compromise of any single speaker exposes the key for the
+entire AD.<a href="#section-5.1.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="section-5.1.1-2.3">Per-speaker keys:</dt>
+            <dd style="margin-left: 1.5em" id="section-5.1.1-2.4">
+              <p id="section-5.1.1-2.4.1">Each speaker has its own key pair. The AD publishes multiple SVCB records
+at <code>_dtn_domain.&lt;AD-Domain&gt;</code>, each with a distinct <code>dtn-pubkey</code>. During
+verification, the Responder <span class="bcp14">MUST</span> attempt signature verification against
+each public key in the record set until one succeeds or all have been
+tried.<a href="#section-5.1.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+</dl>
+<p id="section-5.1.1-3">Example with per-speaker keys:<a href="#section-5.1.1-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1.1-4">
+<pre>
+; Speaker at Goldstone
+_dtn_domain.dsn.example.org.  IN  SVCB  1 gds.dsn.example.org. (
+    dtn-alg=ed25519
+    dtn-pubkey=MCowBQYDK2VwAyEAGb9...
+    port=4556 )
+
+; Speaker at Canberra
+_dtn_domain.dsn.example.org.  IN  SVCB  2 cbr.dsn.example.org. (
+    dtn-alg=ed25519
+    dtn-pubkey=MCowBQYDK2VwAyEAdQ7...
+    port=4556 )
+</pre><a href="#section-5.1.1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-5.1.1-5">Both approaches are valid. Per-speaker keys provide better operational
+security -- a compromised speaker can be revoked by removing its SVCB
+record without affecting other speakers in the AD. The choice between
+shared and per-speaker keys is a local operational decision and is
+transparent to the peering partner.<a href="#section-5.1.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="alignment-with-cl-discovery">
+<section id="section-5.1.2">
+          <h4 id="name-alignment-with-cl-discovery">
+<a href="#section-5.1.2" class="section-number selfRef">5.1.2. </a><a href="#name-alignment-with-cl-discovery" class="section-name selfRef">Alignment with CL Discovery</a>
+          </h4>
+<p id="section-5.1.2-1">This approach aligns with <span>[<a href="#I-D.ek-dtn-ipn-arpa" class="cite xref">I-D.ek-dtn-ipn-arpa</a>]</span> which uses DNS for
+convergence layer endpoint discovery. The <code>_dtn_domain</code> prefix is used for
+AD identity verification, leaving the broader <code>_dtn</code> namespace available
+for transport-specific service discovery in future specifications.<a href="#section-5.1.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="alternative-approaches">
+<section id="section-5.1.3">
+          <h4 id="name-alternative-approaches-work">
+<a href="#section-5.1.3" class="section-number selfRef">5.1.3. </a><a href="#name-alternative-approaches-work" class="section-name selfRef">Alternative Approaches (Working Group Note)</a>
+          </h4>
+<p id="section-5.1.3-1">This subsection documents alternative DNS-based identity verification
+approaches considered during protocol design. It is intended for Working
+Group discussion and will be removed before publication.<a href="#section-5.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.1.3-2">Alternative A: TXT Record<a href="#section-5.1.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.1.3-3">A simpler approach using TXT records, following the pattern established by
+DKIM <span>[<a href="#RFC6376" class="cite xref">RFC6376</a>]</span> and DMARC <span>[<a href="#RFC7489" class="cite xref">RFC7489</a>]</span>:<a href="#section-5.1.3-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1.3-4">
+<pre>
+_dtn_id.dsn.example.org.  IN  TXT  (
+    "v=dtn1; a=ed25519; k=MCowBQYDK2VwAyEAGb9..." )
+</pre><a href="#section-5.1.3-4" class="pilcrow">¶</a>
+</div>
+<table class="center" id="table-6">
+            <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Pros</th>
+                <th class="text-left" rowspan="1" colspan="1">Cons</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Simple, widely deployed</td>
+                <td class="text-left" rowspan="1" colspan="1">Less structured, requires parsing</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Proven pattern (DKIM, DMARC, ACME)</td>
+                <td class="text-left" rowspan="1" colspan="1">Cannot combine identity with service discovery</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">No IANA registration needed for record format</td>
+                <td class="text-left" rowspan="1" colspan="1">Separate records needed for CL endpoints</td>
+              </tr>
+            </tbody>
+          </table>
+<p id="section-5.1.3-6">Alternative B: Namespaced TXT Record<a href="#section-5.1.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.1.3-7">Using a <code>_dtn</code> namespace with sub-labels for different purposes:<a href="#section-5.1.3-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1.3-8">
+<pre>
+_dtn._id.dsn.example.org.  IN  TXT  (
+    "v=1 a=ed25519 k=MCowBQYDK2VwAyEAGb9..." )
+_dtn._bundle._tcp.dsn.example.org.  IN  SRV  (
+    1 1 4556 gateway.dsn.example.org. )
+</pre><a href="#section-5.1.3-8" class="pilcrow">¶</a>
+</div>
+<table class="center" id="table-7">
+            <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Pros</th>
+                <th class="text-left" rowspan="1" colspan="1">Cons</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Separates identity from service discovery</td>
+                <td class="text-left" rowspan="1" colspan="1">Multiple lookups required</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Uses established SRV pattern for CL</td>
+                <td class="text-left" rowspan="1" colspan="1">More complex DNS configuration</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">Compatible with existing resolver behavior</td>
+                <td class="text-left" rowspan="1" colspan="1">Namespace fragmentation</td>
+              </tr>
+            </tbody>
+          </table>
+<p id="section-5.1.3-10">Rationale for SVCB:<a href="#section-5.1.3-10" class="pilcrow">¶</a></p>
+<p id="section-5.1.3-11">The authors selected SVCB (Alternative C) because:<a href="#section-5.1.3-11" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.1.3-12">
+<li id="section-5.1.3-12.1">
+              <p id="section-5.1.3-12.1.1">Unified record: Single DNS lookup provides both identity verification and
+optional service discovery parameters.<a href="#section-5.1.3-12.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5.1.3-12.2">
+              <p id="section-5.1.3-12.2.1">Extensibility: SVCB's typed parameter model allows future extensions
+without format changes.<a href="#section-5.1.3-12.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5.1.3-12.3">
+              <p id="section-5.1.3-12.3.1">Alignment: Consistent with the direction of <span>[<a href="#I-D.ek-dtn-ipn-arpa" class="cite xref">I-D.ek-dtn-ipn-arpa</a>]</span> and
+modern DNS service discovery patterns.<a href="#section-5.1.3-12.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-5.1.3-12.4">
+              <p id="section-5.1.3-12.4.1">Structured data: Native support for typed parameters avoids ad-hoc parsing
+of TXT record values.<a href="#section-5.1.3-12.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+<p id="section-5.1.3-13">The authors invite feedback on this design choice.<a href="#section-5.1.3-13" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="handshake-and-verification-flow">
+<section id="section-5.2">
+        <h3 id="name-handshake-and-verification-">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-handshake-and-verification-" class="section-name selfRef">Handshake and Verification Flow</a>
+        </h3>
+<p id="section-5.2-1">When two DPP speakers peer, they <span class="bcp14">MUST</span> perform the following cryptographic
+handshake:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.2-2">
+<li id="section-5.2-2.1">
+            <p id="section-5.2-2.1.1">Hello: The Initiator <span class="bcp14">MUST</span> send a <code>Hello</code> message containing its
+<code>local_ad_id</code>.<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.2">
+            <p id="section-5.2-2.2.1">Lookup: The Responder <span class="bcp14">MUST</span> query DNS for SVCB records at
+<code>_dtn_domain.&lt;local_ad_id&gt;</code> to fetch the Initiator's Public Key(s) (from the
+<code>dtn-pubkey</code> parameter of each record). If the DNS lookup fails or no
+valid records are found, the Responder <span class="bcp14">MUST</span> reject the session.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.3">
+            <p id="section-5.2-2.3.1">Challenge: The Responder <span class="bcp14">MUST</span> generate a cryptographically random nonce
+(minimum 16 bytes) and send a <code>HelloChallenge</code> message.<a href="#section-5.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.4">
+            <p id="section-5.2-2.4.1">Response: The Initiator <span class="bcp14">MUST</span> sign the nonce with its Private Key and send
+a <code>HelloResponse</code> message.<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.5">
+            <p id="section-5.2-2.5.1">Verification: The Responder <span class="bcp14">MUST</span> verify the signature against the Public
+Key(s) from DNS. If multiple SVCB records were returned, the Responder
+<span class="bcp14">MUST</span> attempt verification against each <code>dtn-pubkey</code> until one succeeds.
+If any key produces a valid signature, the session is ESTABLISHED. If no
+key produces a valid signature, the Responder <span class="bcp14">MUST</span> reject the session and
+<span class="bcp14">SHOULD</span> send a <code>Notification</code> with an appropriate error code.<a href="#section-5.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="loop-detection">
+<section id="section-5.3">
+        <h3 id="name-loop-detection">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-loop-detection" class="section-name selfRef">Loop Detection</a>
+        </h3>
+<p id="section-5.3-1">Routing loops are prevented using the AD_PATH attribute (similar to BGP's
+AS_PATH <span>[<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>). Loop detection operates on Administrative Domain
+identity, not on individual DPP speaker identity. This means an AD <span class="bcp14">MAY</span>
+deploy multiple speakers without risk of routing loops, as all speakers
+within an AD share the same <code>local_ad_id</code>.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.3-2">
+          <dt id="section-5.3-2.1">Mechanism:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.3-2.2">
+            <p id="section-5.3-2.2.1">Every route advertisement <span class="bcp14">MUST</span> include the ordered list of ADs it has
+traversed.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.3-2.3">Propagation:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.3-2.4">
+            <p id="section-5.3-2.4.1">When a DPP speaker re-advertises a route to a peer, it <span class="bcp14">MUST</span> prepend its own
+<code>local_ad_id</code> to the AD_PATH.<a href="#section-5.3-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.3-2.5">Detection:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.3-2.6">
+            <p id="section-5.3-2.6.1">If a DPP speaker receives a route where AD_PATH contains its own
+<code>local_ad_id</code>, the route <span class="bcp14">MUST</span> be silently discarded.<a href="#section-5.3-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="route-attributes-and-advertisements">
+<section id="section-6">
+      <h2 id="name-route-attributes-and-advert">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-route-attributes-and-advert" class="section-name selfRef">Route Attributes and Advertisements</a>
+      </h2>
+<p id="section-6-1">DPP uses an extensible attribute model inspired by BGP path attributes
+<span>[<a href="#RFC4271" class="cite xref">RFC4271</a>]</span>. This allows new route properties to be defined in future protocol
+versions without breaking existing implementations.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="advertisement-structure">
+<section id="section-6.1">
+        <h3 id="name-advertisement-structure">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-advertisement-structure" class="section-name selfRef">Advertisement Structure</a>
+        </h3>
+<p id="section-6.1-1">A <code>RouteAdvertisement</code> follows the BGP UPDATE model:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-6.1-2">
+          <dt id="section-6.1-2.1">Patterns:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.1-2.2">
+            <p id="section-6.1-2.2.1">One or more EidPattern destinations (equivalent to NLRI)<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.1-2.3">Path attributes:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.1-2.4">
+            <p id="section-6.1-2.4.1">Properties shared by all destinations (ad_path, metric)<a href="#section-6.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.1-2.5">Extensible attributes:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.1-2.6">
+            <p id="section-6.1-2.6.1">Optional properties (time window, link characteristics, next-hop)<a href="#section-6.1-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="path-attributes">
+<section id="section-6.2">
+        <h3 id="name-path-attributes">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-path-attributes" class="section-name selfRef">Path Attributes</a>
+        </h3>
+<table class="center" id="table-8">
+          <caption><a href="#table-8" class="selfRef">Table 8</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Field</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>patterns</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">EID patterns for destination matching</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>ad_path</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">List of AD domains traversed (for loop detection and path length)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>metric</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">Administrator preference (lower = preferred, analogous to BGP MED)</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="extensible-attributes">
+<section id="section-6.3">
+        <h3 id="name-extensible-attributes">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-extensible-attributes" class="section-name selfRef">Extensible Attributes</a>
+        </h3>
+<p id="section-6.3-1">Optional attributes shared by all destinations:<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-9">
+          <caption><a href="#table-9" class="selfRef">Table 9</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Attribute</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>gateway_eid</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">Bundle forwarding endpoint (see <a href="#gateway-eid-resolution" class="auto internal xref">Section 6.7</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>valid_from</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">When routes become active (if omitted: immediate)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>valid_until</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">When routes expire (if omitted: until withdrawn)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>bandwidth_bps</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">Link rate in bits per second</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>max_bundle_size</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">Maximum bundle size in bytes</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="forward-compatibility">
+<section id="section-6.4">
+        <h3 id="name-forward-compatibility">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-forward-compatibility" class="section-name selfRef">Forward Compatibility</a>
+        </h3>
+<p id="section-6.4-1">Implementations <span class="bcp14">MUST</span> handle unknown attributes as follows:<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.4-2">
+<li id="section-6.4-2.1">
+            <p id="section-6.4-2.1.1">If <code>transitive = true</code>: Preserve and propagate the attribute unchanged.<a href="#section-6.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.4-2.2">
+            <p id="section-6.4-2.2.1">If <code>transitive = false</code>: Silently discard the attribute.<a href="#section-6.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-6.4-3">This allows intermediate DPP speakers to forward routes with attributes they
+do not understand, enabling incremental deployment of new attribute types.<a href="#section-6.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="time-variant-routing">
+<section id="section-6.5">
+        <h3 id="name-time-variant-routing">
+<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-time-variant-routing" class="section-name selfRef">Time-Variant Routing</a>
+        </h3>
+<p id="section-6.5-1">The <code>valid_from</code> and <code>valid_until</code> attributes enable scheduled contacts for
+deep-space networks (<span>[<a href="#CCSDS-SABRE" class="cite xref">CCSDS-SABRE</a>]</span>). Routes without these attributes are
+valid immediately and remain valid until explicitly withdrawn.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
+<p id="section-6.5-2">A peer <span class="bcp14">MAY</span> send multiple advertisements with non-overlapping time windows to
+describe a series of scheduled contacts.<a href="#section-6.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="route-withdrawal">
+<section id="section-6.6">
+        <h3 id="name-route-withdrawal">
+<a href="#section-6.6" class="section-number selfRef">6.6. </a><a href="#name-route-withdrawal" class="section-name selfRef">Route Withdrawal</a>
+        </h3>
+<p id="section-6.6-1">A <code>RouteWithdrawal</code> cancels previously advertised routes. For scheduled
+routes, the <code>valid_from</code> field identifies which advertisement is being
+withdrawn. If no matching route exists, the withdrawal is silently ignored.<a href="#section-6.6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="gateway-eid-resolution">
+<section id="section-6.7">
+        <h3 id="name-gateway-eid-resolution">
+<a href="#section-6.7" class="section-number selfRef">6.7. </a><a href="#name-gateway-eid-resolution" class="section-name selfRef">Gateway EID Resolution</a>
+        </h3>
+<p id="section-6.7-1">The <code>gateway_eid</code> attribute specifies the endpoint where bundles matching the
+advertised patterns should be forwarded. This enables separation of the
+control plane (DPP session) from the data plane (bundle forwarding).<a href="#section-6.7-1" class="pilcrow">¶</a></p>
+<p id="section-6.7-2">Resolution rules:<a href="#section-6.7-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.7-3">
+<li id="section-6.7-3.1">
+            <p id="section-6.7-3.1.1">If a <code>gateway_eid</code> attribute is present, use it as the forwarding
+destination.<a href="#section-6.7-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.7-3.2">
+            <p id="section-6.7-3.2.1">If <code>gateway_eid</code> is absent, derive the gateway EID from the peer's AD
+identity (<code>local_ad_id</code> from Hello) as follows:<a href="#section-6.7-3.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.7-3.2.2.1">
+                <p id="section-6.7-3.2.2.1.1">If the AD identity is already a valid EID (e.g.,
+<code>dtn://gateway.example.org</code>), use it directly.<a href="#section-6.7-3.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.7-3.2.2.2">
+                <p id="section-6.7-3.2.2.2.1">If the AD identity is a DNS domain name, convert it to a DTN EID:<a href="#section-6.7-3.2.2.2.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.7-3.2.2.2.2">
+<pre>
+&lt;dns_name&gt;  -&gt;  dtn://&lt;dns_name&gt;/
+</pre><a href="#section-6.7-3.2.2.2.2" class="pilcrow">¶</a>
+</div>
+<p id="section-6.7-3.2.2.2.3">
+For example: <code>dsn.example.org</code> -&gt; <code>dtn://dsn.example.org/</code><a href="#section-6.7-3.2.2.2.3" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.7-3.2.2.3">
+                <p id="section-6.7-3.2.2.3.1">Alternatively, implementations <span class="bcp14">MAY</span> query DNS to discover an IPN EID
+mapping for the domain. See <span>[<a href="#I-D.ek-dtn-ipn-arpa" class="cite xref">I-D.ek-dtn-ipn-arpa</a>]</span> for the ongoing
+work on IPN URI scheme DNS resolution.<a href="#section-6.7-3.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+        </ol>
+<p id="section-6.7-4">This design allows flexibility in deployment while providing sensible
+defaults:<a href="#section-6.7-4" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-6.7-5">
+          <dt id="section-6.7-5.1">DNS-based AD:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.7-5.2">
+            <p id="section-6.7-5.2.1">An AD with identity <code>dsn.example.org</code> automatically maps to
+<code>dtn://dsn.example.org/</code> as the default gateway. No explicit <code>gateway_eid</code>
+is required.<a href="#section-6.7-5.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.7-5.3">Explicit EID AD:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.7-5.4">
+            <p id="section-6.7-5.4.1">A DPP speaker with AD identity <code>dtn://gateway.dsn.example.org</code> uses that
+EID directly.<a href="#section-6.7-5.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.7-5.5">Separated control plane:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.7-5.6">
+            <p id="section-6.7-5.6.1">A DPP speaker that is not itself a gateway (e.g., a centralized route
+controller) can advertise routes with explicit <code>gateway_eid</code> pointing to
+the forwarding nodes within the AD, enabling load distribution or failover.<a href="#section-6.7-5.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-6.7-5.7">Load distribution:</dt>
+          <dd style="margin-left: 1.5em" id="section-6.7-5.8">
+            <p id="section-6.7-5.8.1">Multiple routes to the same destination can be advertised with different
+<code>gateway_eid</code> values and metrics.<a href="#section-6.7-5.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-6.7-6">Examples:<a href="#section-6.7-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.7-7">
+<pre>
+# AD identity is DNS name - gateway_eid derived automatically
+AD Identity: dsn.example.org
+Default Gateway EID: dtn://dsn.example.org/
+
+RouteAdvertisement {
+  patterns: [ipn:100.*]
+  ad_path: ["dsn.example.org"]
+  metric: 10
+  // No gateway_eid needed - defaults to dtn://dsn.example.org/
+}
+</pre><a href="#section-6.7-7" class="pilcrow">¶</a>
+</div>
+<div class="alignLeft art-text artwork" id="section-6.7-8">
+<pre>
+# Explicit gateway_eid for control/data plane separation
+AD Identity: dsn.example.org
+
+RouteAdvertisement {
+  patterns: [ipn:100.*]
+  ad_path: ["dsn.example.org"]
+  metric: 10
+  attributes: [
+    gateway_eid: "dtn://ingress1.dsn.example.org"
+  ]
+}
+</pre><a href="#section-6.7-8" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="protocol-definition">
+<section id="section-7">
+      <h2 id="name-protocol-definition">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-protocol-definition" class="section-name selfRef">Protocol Definition</a>
+      </h2>
+<p id="section-7-1">The protocol uses a single bi-directional gRPC stream for the entire
+lifecycle of the session.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<div id="service-definition">
+<section id="section-7.1">
+        <h3 id="name-service-definition">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-service-definition" class="section-name selfRef">Service Definition</a>
+        </h3>
+<div class="lang-protobuf sourcecode" id="section-7.1-1">
+<pre>
+syntax = "proto3";
+package dtn.peering.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service DtnPeering {
+  // Single stream for Handshake, Auth, Routes, and Keepalives
+  rpc Peer(stream PeerMessage) returns (stream PeerMessage);
+}
+</pre><a href="#section-7.1-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="message-envelope">
+<section id="section-7.2">
+        <h3 id="name-message-envelope">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-message-envelope" class="section-name selfRef">Message Envelope</a>
+        </h3>
+<div class="lang-protobuf sourcecode" id="section-7.2-1">
+<pre>
+message PeerMessage {
+  uint64 sequence_number = 1;
+  oneof payload {
+    Hello hello = 10;
+    HelloChallenge challenge = 11;
+    HelloResponse response = 12;
+    KeepAlive keep_alive = 20;
+    RouteUpdate update = 21;
+    Notification notification = 30;
+  }
+}
+</pre><a href="#section-7.2-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="identity-and-authentication-messages">
+<section id="section-7.3">
+        <h3 id="name-identity-and-authentication">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-identity-and-authentication" class="section-name selfRef">Identity and Authentication Messages</a>
+        </h3>
+<div class="lang-protobuf sourcecode" id="section-7.3-1">
+<pre>
+message Hello {
+  string local_ad_id = 1;        // DNS Domain (e.g., "dsn.example.org")
+  string speaker_node_id = 2;    // Debug ID (e.g., "dtn://speaker-alpha")
+  uint32 hold_time_seconds = 3;
+}
+
+message HelloChallenge { bytes nonce = 1; }
+message HelloResponse { bytes signature = 1; }
+</pre><a href="#section-7.3-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="routing-messages">
+<section id="section-7.4">
+        <h3 id="name-routing-messages">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-routing-messages" class="section-name selfRef">Routing Messages</a>
+        </h3>
+<div class="lang-protobuf sourcecode" id="section-7.4-1">
+<pre>
+message RouteUpdate {
+  repeated RouteAdvertisement announcements = 1;
+  repeated RouteWithdrawal withdrawals = 2;
+}
+
+// Route advertisement with extensible attributes
+// Next-hop is determined per Gateway EID Resolution
+// (explicit attribute or derived from AD identity)
+// All fields except `patterns` are path attributes
+// shared by all destinations
+message RouteAdvertisement {
+  // Destinations (NLRI equivalent)
+  repeated EidPattern patterns = 1;
+
+  // Path attributes (shared by all destinations)
+  repeated string ad_path = 2;  // List of AD Domains for loop detection
+  uint32 metric = 3;            // Administrator preference (lower = preferred)
+  // Note: specificity_score is NOT transmitted;
+  // receiver computes it from pattern
+
+  // Extensible attributes
+  repeated RouteAttribute attributes = 10;
+}
+
+message RouteWithdrawal {
+  repeated EidPattern patterns = 1;         // Destinations to withdraw
+  // For scheduled routes, valid_from identifies which advertisement
+  // to withdraw
+  google.protobuf.Timestamp valid_from = 2; // Optional: identifies
+                                            // scheduled route
+}
+</pre><a href="#section-7.4-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="route-attributes">
+<section id="section-7.5">
+        <h3 id="name-route-attributes">
+<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-route-attributes" class="section-name selfRef">Route Attributes</a>
+        </h3>
+<div class="lang-protobuf sourcecode" id="section-7.5-1">
+<pre>
+// Extensible route attribute (BGP-style path attributes)
+// New attribute types can be added in future protocol versions
+message RouteAttribute {
+  oneof attribute {
+    // Gateway for data plane separation
+    string gateway_eid = 1;                      // Bundle forwarding
+                                                 // endpoint
+
+    // Time window attributes
+    google.protobuf.Timestamp valid_from = 2;    // When routes become
+                                                 // active
+    google.protobuf.Timestamp valid_until = 3;   // When routes expire
+
+    // Link characteristics
+    uint64 bandwidth_bps = 4;          // Link rate (bits per second)
+    uint32 max_bundle_size = 5;        // Maximum bundle size (bytes)
+
+    // Forward compatibility: unknown attributes are preserved
+    // and propagated
+    UnknownAttribute unknown = 255;
+  }
+}
+
+// For forward compatibility with future attribute types
+message UnknownAttribute {
+  uint32 type_id = 1;      // Identifies the attribute type
+  bytes value = 2;         // Opaque value
+  bool transitive = 3;     // If true, propagate even if not understood
+}
+</pre><a href="#section-7.5-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="data-types">
+<section id="section-7.6">
+        <h3 id="name-data-types">
+<a href="#section-7.6" class="section-number selfRef">7.6. </a><a href="#name-data-types" class="section-name selfRef">Data Types</a>
+        </h3>
+<div class="lang-protobuf sourcecode" id="section-7.6-1">
+<pre>
+message EidPattern {
+  oneof scheme {
+    IpnPattern ipn = 1;
+    DtnPattern dtn = 2;
+  }
+}
+
+message IpnPattern {
+  uint64 allocator_id = 1;
+  uint64 node_id = 2;
+  bool is_wildcard = 3;
+}
+
+message DtnPattern {
+  string authority_string = 1; // e.g. "rover*.example.org"
+  bool is_wildcard = 2;
+}
+</pre><a href="#section-7.6-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="control-messages">
+<section id="section-7.7">
+        <h3 id="name-control-messages">
+<a href="#section-7.7" class="section-number selfRef">7.7. </a><a href="#name-control-messages" class="section-name selfRef">Control Messages</a>
+        </h3>
+<div class="lang-protobuf sourcecode" id="section-7.7-1">
+<pre>
+message KeepAlive {}
+
+message Notification {
+  enum Level { INFO=0; WARNING=1; ERROR=2; }
+  Level level = 1;
+  string message = 2;
+  int32 code = 3;
+}
+</pre><a href="#section-7.7-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="operational-state-machine">
+<section id="section-8">
+      <h2 id="name-operational-state-machine">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-operational-state-machine" class="section-name selfRef">Operational State Machine</a>
+      </h2>
+<p id="section-8-1">A conformant DPP speaker <span class="bcp14">MUST</span> implement the following connection state
+machine.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div id="states">
+<section id="section-8.1">
+        <h3 id="name-states">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-states" class="section-name selfRef">States</a>
+        </h3>
+<table class="center" id="table-10">
+          <caption><a href="#table-10" class="selfRef">Table 10</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">State</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">CONNECTING</td>
+              <td class="text-left" rowspan="1" colspan="1">Transport (TCP/TLS) established. Speaker <span class="bcp14">MUST</span> send a <code>Hello</code> message.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">HANDSHAKE_SENT</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>Hello</code> sent. Speaker <span class="bcp14">MUST</span> wait for <code>HelloChallenge</code>.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">CHALLENGE_WAIT</td>
+              <td class="text-left" rowspan="1" colspan="1">Waiting for <code>HelloChallenge</code>. Upon receipt, Speaker <span class="bcp14">MUST</span> sign nonce and send <code>HelloResponse</code>.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">RESPONSE_SENT</td>
+              <td class="text-left" rowspan="1" colspan="1">Signed nonce sent. Speaker <span class="bcp14">MUST</span> wait for verification acknowledgment or <code>RouteUpdate</code>.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ESTABLISHED</td>
+              <td class="text-left" rowspan="1" colspan="1">Valid signature verified. Speaker <span class="bcp14">MAY</span> send and receive <code>RouteUpdate</code> messages.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">FAILED</td>
+              <td class="text-left" rowspan="1" colspan="1">Error occurred. Speaker <span class="bcp14">MUST</span> send <code>Notification</code> (if possible) and close stream.</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="keepalive-requirements">
+<section id="section-8.2">
+        <h3 id="name-keepalive-requirements">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-keepalive-requirements" class="section-name selfRef">Keepalive Requirements</a>
+        </h3>
+<p id="section-8.2-1">In the ESTABLISHED state, a DPP speaker <span class="bcp14">MUST</span> send <code>KeepAlive</code> messages at
+intervals not exceeding <code>hold_time_seconds / 3</code>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="error-handling">
+<section id="section-8.3">
+        <h3 id="name-error-handling">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-error-handling" class="section-name selfRef">Error Handling</a>
+        </h3>
+<p id="section-8.3-1">Any error condition (DNS lookup failure, invalid signature, hold timer expiry,
+transport error) <span class="bcp14">MUST</span> cause the DPP speaker to:<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.3-2">
+<li id="section-8.3-2.1">
+            <p id="section-8.3-2.1.1">Send a <code>Notification</code> message with an appropriate error code (if possible).<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-8.3-2.2">
+            <p id="section-8.3-2.2.1">Close the stream.<a href="#section-8.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-8.3-2.3">
+            <p id="section-8.3-2.3.1">Log the failure reason (<span class="bcp14">SHOULD</span>).<a href="#section-8.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
 </section>
 </div>
 <div id="security-considerations">
-<section id="section-3">
+<section id="section-9">
       <h2 id="name-security-considerations">
-<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-3-1">TODO Security<a href="#section-3-1" class="pilcrow">¶</a></p>
+<div id="identity-verification">
+<section id="section-9.1">
+        <h3 id="name-identity-verification">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-identity-verification" class="section-name selfRef">Identity Verification</a>
+        </h3>
+<p id="section-9.1-1">DPP relies on DNS for identity verification. The security of this mechanism
+depends on:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-9.1-2">
+          <dt id="section-9.1-2.1">DNSSEC:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.1-2.2">
+            <p id="section-9.1-2.2.1">Deployments <span class="bcp14">SHOULD</span> use DNSSEC to protect against DNS spoofing attacks.
+Without DNSSEC, an attacker who can manipulate DNS responses could
+impersonate an Administrative Domain.<a href="#section-9.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-9.1-2.3">Private Key Protection:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.1-2.4">
+            <p id="section-9.1-2.4.1">The private key corresponding to the public key published in the
+<code>_dtn_domain</code> SVCB record <span class="bcp14">MUST</span> be protected. Compromise of this key allows impersonation
+of the Administrative Domain.<a href="#section-9.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="transport-security">
+<section id="section-9.2">
+        <h3 id="name-transport-security">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-transport-security" class="section-name selfRef">Transport Security</a>
+        </h3>
+<p id="section-9.2-1">This specification does not mandate transport layer security beyond identity
+verification. However:<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.2-2.1">
+            <p id="section-9.2-2.1.1">Implementations <span class="bcp14">SHOULD</span> use TLS 1.3 or later for transport encryption.<a href="#section-9.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.2-2.2">
+            <p id="section-9.2-2.2.1">Implementations <span class="bcp14">SHOULD</span> verify the peer's TLS certificate matches the
+claimed AD identity.<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="route-injection-attacks">
+<section id="section-9.3">
+        <h3 id="name-route-injection-attacks">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-route-injection-attacks" class="section-name selfRef">Route Injection Attacks</a>
+        </h3>
+<p id="section-9.3-1">A malicious or compromised DPP speaker could advertise routes for destinations
+it does not legitimately serve. Mitigations include:<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-9.3-2">
+          <dt id="section-9.3-2.1">Out-of-band verification:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.3-2.2">
+            <p id="section-9.3-2.2.1">Operators <span class="bcp14">SHOULD</span> verify route advertisements through external channels
+before accepting routes to critical destinations.<a href="#section-9.3-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-9.3-2.3">Route filtering:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.3-2.4">
+            <p id="section-9.3-2.4.1">Implementations <span class="bcp14">SHOULD</span> support policy-based route filtering to reject
+unexpected advertisements.<a href="#section-9.3-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-9.3-2.5">Anomaly detection:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.3-2.6">
+            <p id="section-9.3-2.6.1">Operators <span class="bcp14">SHOULD</span> monitor for unexpected route changes.<a href="#section-9.3-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="denial-of-service">
+<section id="section-9.4">
+        <h3 id="name-denial-of-service">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-denial-of-service" class="section-name selfRef">Denial of Service</a>
+        </h3>
+<p id="section-9.4-1">DPP speakers are potentially vulnerable to denial of service attacks:<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-9.4-2">
+          <dt id="section-9.4-2.1">Connection exhaustion:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.4-2.2">
+            <p id="section-9.4-2.2.1">Implementations <span class="bcp14">SHOULD</span> limit the number of concurrent sessions and
+implement rate limiting for new connections.<a href="#section-9.4-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-9.4-2.3">Route table exhaustion:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.4-2.4">
+            <p id="section-9.4-2.4.1">Implementations <span class="bcp14">SHOULD</span> limit the number of routes accepted from a single
+peer.<a href="#section-9.4-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-9.4-2.5">Keepalive flooding:</dt>
+          <dd style="margin-left: 1.5em" id="section-9.4-2.6">
+            <p id="section-9.4-2.6.1">Implementations <span class="bcp14">SHOULD</span> rate-limit incoming messages.<a href="#section-9.4-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="privacy-considerations">
+<section id="section-9.5">
+        <h3 id="name-privacy-considerations">
+<a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+        </h3>
+<p id="section-9.5-1">Route advertisements reveal network topology and reachability information.
+Operators should consider whether this information is sensitive before
+establishing peering relationships.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-4">
+<section id="section-10">
       <h2 id="name-iana-considerations">
-<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-4-1">This document has no IANA actions.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="svcb-svcparamkeys">
+<section id="section-10.1">
+        <h3 id="name-svcb-svcparamkeys">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-svcb-svcparamkeys" class="section-name selfRef">SVCB SvcParamKeys</a>
+        </h3>
+<p id="section-10.1-1">This document requests IANA registration of the following entries in the
+"Service Parameter Keys (SvcParamKeys)" registry:<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-11">
+          <caption><a href="#table-11" class="selfRef">Table 11</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Number</th>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+              <th class="text-left" rowspan="1" colspan="1">Meaning</th>
+              <th class="text-left" rowspan="1" colspan="1">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">TBD</td>
+              <td class="text-left" rowspan="1" colspan="1">dtn-alg</td>
+              <td class="text-left" rowspan="1" colspan="1">DTN identity signature algorithm</td>
+              <td class="text-left" rowspan="1" colspan="1">This document</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">TBD</td>
+              <td class="text-left" rowspan="1" colspan="1">dtn-pubkey</td>
+              <td class="text-left" rowspan="1" colspan="1">DTN identity public key (base64)</td>
+              <td class="text-left" rowspan="1" colspan="1">This document</td>
+            </tr>
+          </tbody>
+        </table>
 </section>
 </div>
-<div id="sec-normative-references">
-<section id="section-5">
-      <h2 id="name-normative-references">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<div id="underscore-prefixed-dns-name">
+<section id="section-10.2">
+        <h3 id="name-underscore-prefixed-dns-nam">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-underscore-prefixed-dns-nam" class="section-name selfRef">Underscore-Prefixed DNS Name</a>
+        </h3>
+<p id="section-10.2-1">This document requests registration of <code>_dtn_domain</code> in the "Underscored and
+Globally Scoped DNS Node Names" registry per <span>[<a href="#RFC8552" class="cite xref">RFC8552</a>]</span>:<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-12">
+          <caption><a href="#table-12" class="selfRef">Table 12</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">RR Type</th>
+              <th class="text-left" rowspan="1" colspan="1">_NODE NAME</th>
+              <th class="text-left" rowspan="1" colspan="1">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">SVCB</td>
+              <td class="text-left" rowspan="1" colspan="1">_dtn_domain</td>
+              <td class="text-left" rowspan="1" colspan="1">This document</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="future-considerations">
+<section id="section-10.3">
+        <h3 id="name-future-considerations">
+<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-future-considerations" class="section-name selfRef">Future Considerations</a>
+        </h3>
+<p id="section-10.3-1">Future versions may additionally request:<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10.3-2.1">
+            <p id="section-10.3-2.1.1">Registration of a well-known port for DPP (if not using existing gRPC
+conventions)<a href="#section-10.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.3-2.2">
+            <p id="section-10.3-2.2.1">Establishment of a registry for DPP route attribute types<a href="#section-10.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.3-2.3">
+            <p id="section-10.3-2.3.1">Registration of <code>dpp</code> in the ALPN Protocol IDs registry<a href="#section-10.3-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-11">
+      <h2 id="name-references">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
+<div id="sec-normative-references">
+<section id="section-11.1">
+        <h3 id="name-normative-references">
+<a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
 <dl class="references">
+<dt id="I-D.ietf-dtn-eid-pattern">[I-D.ietf-dtn-eid-pattern]</dt>
+        <dd>
+<span class="refAuthor">Sipos, B.</span>, <span class="refTitle">"Bundle Protocol Endpoint ID Patterns"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-dtn-eid-pattern-06</span>, <time datetime="2026-01-16" class="refDate">16 January 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-dtn-eid-pattern-06">https://datatracker.ietf.org/doc/html/draft-ietf-dtn-eid-pattern-06</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-    <dd>
+        <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC8552">[RFC8552]</dt>
+        <dd>
+<span class="refAuthor">Crocker, D.</span>, <span class="refTitle">"Scoped Interpretation of DNS Resource Records through "Underscored" Naming of Attribute Leaves"</span>, <span class="seriesInfo">BCP 222</span>, <span class="seriesInfo">RFC 8552</span>, <span class="seriesInfo">DOI 10.17487/RFC8552</span>, <time datetime="2019-03" class="refDate">March 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8552">https://www.rfc-editor.org/rfc/rfc8552</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9171">[RFC9171]</dt>
+        <dd>
+<span class="refAuthor">Burleigh, S.</span>, <span class="refAuthor">Fall, K.</span>, and <span class="refAuthor">E. Birrane, III</span>, <span class="refTitle">"Bundle Protocol Version 7"</span>, <span class="seriesInfo">RFC 9171</span>, <span class="seriesInfo">DOI 10.17487/RFC9171</span>, <time datetime="2022-01" class="refDate">January 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9171">https://www.rfc-editor.org/rfc/rfc9171</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9460">[RFC9460]</dt>
+      <dd>
+<span class="refAuthor">Schwartz, B.</span>, <span class="refAuthor">Bishop, M.</span>, and <span class="refAuthor">E. Nygren</span>, <span class="refTitle">"Service Binding and Parameter Specification via the DNS (SVCB and HTTPS Resource Records)"</span>, <span class="seriesInfo">RFC 9460</span>, <span class="seriesInfo">DOI 10.17487/RFC9460</span>, <time datetime="2023-11" class="refDate">November 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9460">https://www.rfc-editor.org/rfc/rfc9460</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 </dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-11.2">
+        <h3 id="name-informative-references">
+<a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="CCSDS-SABRE">[CCSDS-SABRE]</dt>
+        <dd>
+<span class="refAuthor">Consultative Committee for Space Data Systems</span>, <span class="refTitle">"Schedule-Aware Bundle Routing"</span>, <span>n.d.</span>, <span>&lt;<a href="https://public.ccsds.org/">https://public.ccsds.org/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ek-dtn-ipn-arpa">[I-D.ek-dtn-ipn-arpa]</dt>
+        <dd>
+<span class="refAuthor">Kline, E.</span>, <span class="refTitle">"The ipn.arpa Zone and IPN DNS Operations"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ek-dtn-ipn-arpa-00</span>, <time datetime="2025-11-04" class="refDate">4 November 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ek-dtn-ipn-arpa-00">https://datatracker.ietf.org/doc/html/draft-ek-dtn-ipn-arpa-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4271">[RFC4271]</dt>
+        <dd>
+<span class="refAuthor">Rekhter, Y., Ed.</span>, <span class="refAuthor">Li, T., Ed.</span>, and <span class="refAuthor">S. Hares, Ed.</span>, <span class="refTitle">"A Border Gateway Protocol 4 (BGP-4)"</span>, <span class="seriesInfo">RFC 4271</span>, <span class="seriesInfo">DOI 10.17487/RFC4271</span>, <time datetime="2006-01" class="refDate">January 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4271">https://www.rfc-editor.org/rfc/rfc4271</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6376">[RFC6376]</dt>
+        <dd>
+<span class="refAuthor">Crocker, D., Ed.</span>, <span class="refAuthor">Hansen, T., Ed.</span>, and <span class="refAuthor">M. Kucherawy, Ed.</span>, <span class="refTitle">"DomainKeys Identified Mail (DKIM) Signatures"</span>, <span class="seriesInfo">STD 76</span>, <span class="seriesInfo">RFC 6376</span>, <span class="seriesInfo">DOI 10.17487/RFC6376</span>, <time datetime="2011-09" class="refDate">September 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6376">https://www.rfc-editor.org/rfc/rfc6376</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7489">[RFC7489]</dt>
+      <dd>
+<span class="refAuthor">Kucherawy, M., Ed.</span> and <span class="refAuthor">E. Zwicky, Ed.</span>, <span class="refTitle">"Domain-based Message Authentication, Reporting, and Conformance (DMARC)"</span>, <span class="seriesInfo">RFC 7489</span>, <span class="seriesInfo">DOI 10.17487/RFC7489</span>, <time datetime="2015-03" class="refDate">March 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7489">https://www.rfc-editor.org/rfc/rfc7489</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
 </section>
 </div>
 <div id="acknowledgments">
@@ -1229,7 +3156,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">TODO acknowledge.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">This document was developed as part of the Hardy BPv7 DTN Router project.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
@@ -1238,11 +3165,11 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
 <address class="vcard">
-        <div dir="auto" class="left"><span class="fn nameRole">Your Name Here</span></div>
-<div dir="auto" class="left"><span class="org">Your Organization Here</span></div>
+        <div dir="auto" class="left"><span class="fn nameRole">Rick Taylor</span></div>
+<div dir="auto" class="left"><span class="org">Aalyria Technologies</span></div>
 <div class="email">
 <span>Email:</span>
-<a href="mailto:your.email@example.com" class="email">your.email@example.com</a>
+<a href="mailto:rtaylor@aalyria.com" class="email">rtaylor@aalyria.com</a>
 </div>
 </address>
 </section>
