@@ -34,6 +34,7 @@ normative:
   RFC8552:
   RFC9171:
   RFC9460:
+  RFC9758:
   I-D.ietf-dtn-eid-pattern:
 
 informative:
@@ -264,29 +265,27 @@ To ensure efficient FIB lookups and O(1) specificity scoring, DPP restricts the
 generic EID patterns defined in {{I-D.ietf-dtn-eid-pattern}} to a Strict
 Monotonic Subset.
 
-A pattern exhibits monotonic specificity if all wildcard components are confined
-to the logical "leaves" of the naming hierarchy. A specific child component
-cannot exist under a wildcard parent.
+A pattern exhibits monotonic specificity if all wildcard components are confined to the logical "leaves" of the naming hierarchy. A specific child component cannot exist under a wildcard parent. Equivalently, when a pattern is read in hierarchy order, the wildcard (if present) MUST be the terminal element: no specific component, label, or character may follow it. This is what guarantees that any two patterns matching the same EID are nested, keeping both specificity comparison and longest-prefix lookup well-defined.
 
 ### IPN Scheme Constraints (Left-to-Right Hierarchy)
 
-The `ipn` scheme hierarchy is defined as Allocator -> Node.
+The `ipn` scheme hierarchy is defined as Allocator -> Node -> Service Number.
+If a component is not specific (i.e., is a wildcard or range), every component
+to its right in the hierarchy MUST be a wildcard.
 
-- Wildcards or ranges are only permitted in the Node number if the Allocator
-  is specific.
-- Valid: `ipn:100.1` (Specific), `ipn:100.*` (Monotonic).
-- Invalid: `ipn:*.1`, `ipn:[100-200].1` (Specific Node under Wildcard
-  Allocator).
+- Valid: `ipn:100.1.5` (Fully specific), `ipn:100.1.*` (Service Wildcard),
+  `ipn:100.*.*` (Monotonic).
+- Invalid: `ipn:*.1.*` (Specific Node under Wildcard Allocator),
+  `ipn:100.*.5` (Specific Service under Wildcard Node).
 
 ### DTN Scheme Constraints (Right-to-Left Hierarchy)
 
 The `dtn` scheme hierarchy follows standard DNS rules: TLD <- Domain <- Host.
 
-- Wildcards are only permitted in the left-most label (the Host or lowest
-  subdomain).
-- Valid: `dtn://rover1.example.org` (Exact), `dtn://*.example.org` (Wildcard
-  Host), `dtn://rover*.example.org` (Partial Host).
-- Invalid: `dtn://rover1.*.example.org` (Specific Child under Wildcard Parent).
+- Wildcards are only permitted in the left-most label (the Host or lowest subdomain), and only as the entire label or as its trailing suffix: the wildcard MUST be the last character of that label. A wildcard followed by literal characters does not exhibit monotonic specificity — two such patterns can match the same EID without either containing the other.
+- A pattern whose authority contains a wildcard MUST use `**` as its service path: a specific path under a wildcard host is a specific child under a wildcard parent.
+- Valid: `dtn://rover1.example.org` (Exact), `dtn://*.example.org` (Wildcard Host), `dtn://rover*.example.org` (Partial Host).
+- Invalid: `dtn://rover1.*.example.org` (Specific Child under Wildcard Parent), `dtn://r*1.example.org` and `dtn://*rover.example.org` (non-terminal wildcard), `dtn://rover*.example.org/svc` (specific path under a wildcard host).
 
 ### Single Wildcard Constraint
 
@@ -314,47 +313,47 @@ IsExact (0 or 1):
 : 1 if the pattern contains NO wildcards; 0 otherwise.
 
 Multiplier (256):
-: A weight ensuring any Exact Match outranks any Wildcard Match (assuming max
-  literal length < 256).
+: A weight ensuring any Exact Match outranks any Wildcard Match. The maximum
+  LiteralLength is 96 for `ipn` patterns (3 × 32 bits), which is well below
+  256.
 
 LiteralLength:
 : The count of non-wildcard characters (or equivalent bits for integers).
 
 ### DTN Scheme Scoring
 
-For `dtn` URIs, LiteralLength is the count of characters in the Authority
-string excluding the wildcard.
+For `dtn` URIs, LiteralLength is the count of non-wildcard characters across
+the entire EID pattern (authority and service path).
 
 | Pattern | Characters | Score |
 |---------|------------|-------|
-| `dtn://rover1.example.org` | 18 (exact) | 274 |
-| `dtn://rover*.example.org` | 17 (wildcard) | 17 |
+| `dtn://rover1.example.org/svc` | 21 (exact) | 277 |
+| `dtn://rover*.example.org/**` | 18 (wildcard) | 18 |
 
 ### IPN Scheme Scoring
 
 For `ipn` EIDs, LiteralLength represents the "Effective Bit Depth" of the
-pattern. The IPN address space is treated as a 64-bit virtual integer, split
-logically into a 32-bit Allocator and a 32-bit Node.
+pattern. The IPN address space is treated as a 96-bit virtual integer,
+composed of three 32-bit components: Allocator, Node, and Service Number.
+({{RFC9758}} reserves Service Numbers >= 2^32 for future expansion.)
 
 ~~~
-LiteralLength = Bits_Allocator + Bits_Node
+LiteralLength = Bits_Allocator + Bits_Node + Bits_Service
 ~~~
 
-1. Allocator Part (Bits 63-32):
-   - Specific Allocator (e.g., `100`): 32 bits.
-   - Wildcard Allocator (`*`): 0 bits.
+Each component contributes:
 
-2. Node Part (Bits 31-0):
-   - Specific Node (e.g., `.1`): 32 bits.
-   - Wildcard Node (`.*`): 0 bits.
-   - Range `.[min-max]`: 32 - ceil(log2(Count)) bits.
+- Specific value (e.g., `100`): 32 bits.
+- Wildcard (`*`): 0 bits.
+- Range `[min-max]`: 32 - ceil(log2(Count)) bits.
 
 | IPN Pattern | Classification | IsExact | LiteralLength | Score |
 |-------------|----------------|---------|---------------|-------|
-| `ipn:100.1` | Specific Node | 1 | 64 | 320 |
-| `ipn:100.*` | Allocator Wildcard | 0 | 32 | 32 |
-| `ipn:100.[10-13]` | Node Range (Size 4) | 0 | 62 | 62 |
-| `ipn:*` | Default Route | 0 | 0 | 0 |
+| `ipn:100.1.5` | Specific EID | 1 | 96 | 352 |
+| `ipn:100.1.*` | Service Wildcard | 0 | 64 | 64 |
+| `ipn:100.*.*` | Node Wildcard | 0 | 32 | 32 |
+| `ipn:100.[10-13].*` | Node Range (Size 4) | 0 | 62 | 62 |
+| `ipn:**` | Default Route | 0 | 0 | 0 |
 
 ## The Metric Field
 
@@ -370,7 +369,7 @@ Organization B has two DPP speakers peering with Organization A:
   - Speaker in Europe  (gateway with high latency to Mars relay)
   - Speaker in Australia (gateway with low latency to Mars relay)
 
-Organization B advertises routes to ipn:200.* via both speakers:
+Organization B advertises routes to ipn:200.*.* via both speakers:
   - Europe speaker:    metric = 100
   - Australia speaker: metric = 10
 
@@ -737,7 +736,7 @@ AD Identity: dsn.example.org
 Default Gateway EID: dtn://dsn.example.org/
 
 RouteAdvertisement {
-  patterns: [ipn:100.*]
+  patterns: [ipn:100.*.*]
   ad_path: ["dsn.example.org"]
   metric: 10
   // No gateway_eid needed - defaults to dtn://dsn.example.org/
@@ -749,7 +748,7 @@ RouteAdvertisement {
 AD Identity: dsn.example.org
 
 RouteAdvertisement {
-  patterns: [ipn:100.*]
+  patterns: [ipn:100.*.*]
   ad_path: ["dsn.example.org"]
   metric: 10
   attributes: [
