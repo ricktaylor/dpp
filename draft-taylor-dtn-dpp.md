@@ -32,6 +32,7 @@ author:
 
 normative:
   RFC4035:
+  RFC5890:
   RFC6698:
   RFC7671:
   RFC8126:
@@ -51,15 +52,23 @@ normative:
       Internet-Draft: draft-taylor-dtn-eid-pattern-dtn-00
     ann: "Work in progress; not yet published."
   PROTOBUF:
-    title: "Protocol Buffers Version 3 Language Specification"
+    title: "Protocol Buffers: Encoding"
     author:
-      - org: Google
-    target: https://protobuf.dev/reference/protobuf/proto3-spec/
+      - org: Google LLC
+    date: 2026-10-08
+    seriesinfo:
+      commit: d75b49a09168103d132dcccf7dc9d6e126ba1f98
+    target: https://github.com/protocolbuffers/protocolbuffers.github.io/blob/d75b49a09168103d132dcccf7dc9d6e126ba1f98/content/programming-guides/encoding.md
+    ann: "The protobuf wire format. The current rendering is at https://protobuf.dev/programming-guides/encoding/."
   GRPC:
     title: "gRPC over HTTP2"
     author:
       - org: The gRPC Authors
-    target: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
+    date: 2025-04-17
+    seriesinfo:
+      commit: cf61c7d62a1a7f43b9d2ea6488186bc14fc41a8c
+    target: https://github.com/grpc/grpc/blob/cf61c7d62a1a7f43b9d2ea6488186bc14fc41a8c/doc/PROTOCOL-HTTP2.md
+    ann: "The gRPC wire protocol over HTTP/2. The current revision is at https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md."
 
 informative:
   RFC3345:
@@ -259,11 +268,12 @@ Local preference:
   It is the first criterion of route selection after specificity
   ({{route-selection}}).
 
-Transitive attribute:
-: A route attribute that a speaker propagates when it re-advertises a route
-  even if it does not understand the attribute. Non-transitive attributes
-  are dropped by a speaker that does not understand them
-  ({{forward-compatibility}}).
+Transitive:
+: A flag carried with an attribute whose type the receiving speaker may
+  not understand, telling such a speaker whether to propagate the
+  attribute unchanged when it re-advertises the route, or to drop it
+  ({{forward-compatibility}}). It says nothing about how a speaker that
+  does understand the attribute treats it.
 
 Routing Information Base (RIB):
 : The set of routes a speaker holds, from all sessions and its own
@@ -278,12 +288,17 @@ Forwarding Information Base (FIB):
 
 # Architecture Overview
 
-## Administrative Domains
+## Administrative Domains {#architecture-ads}
 
 An Administrative Domain is an autonomous unit of routing control.
 
 Identity:
 : An AD is identified solely by a DNS domain name (e.g., `dsn.example.org`).
+  Wherever an AD identity appears in DPP, in a `Hello`, in AD_PATH, or in
+  AD_SET, it is a fully qualified domain name without a trailing dot,
+  with any internationalized labels in A-label form
+  ({{Section 2.3.2.1 of RFC5890}}). Two AD identities are the same if
+  they are equal under case-insensitive ASCII comparison.
 
 Independence:
 : An AD Identity is distinct from the nodes it advertises. An AD named
@@ -564,9 +579,11 @@ A DPP session is established as follows:
 3. Peer check: On receiving the peer's `Hello`, the Initiator MUST reject
    the session if the `local_ad_id` it contains is not the AD to which the
    Initiator intended to connect. The Responder MUST reject the session if
-   the `local_ad_id` is not an AD with which it is configured to peer.
-   Performing this check before the DNS lookup prevents an unauthenticated
-   peer from causing lookups of arbitrary names. Either speaker MUST also
+   the `local_ad_id` is not an AD with which it is configured to peer. AD
+   identities are compared as described in {{architecture-ads}}; a
+   `local_ad_id` that is not a valid domain name in that form is treated
+   as not matching. Performing this check before the DNS lookup prevents
+   an unauthenticated peer from causing lookups of arbitrary names. Either speaker MUST also
    reject the session if the `version` in the peer's `Hello` is not one it
    supports, or if the peer's `hold_time_seconds` is unacceptable
    ({{hold-time}}).
@@ -725,6 +742,16 @@ speaker MUST remove all routes received over it ({{advertisement-id}}),
 repeat route selection, and update its advertisements to other peers
 ({{readvertisement}}).
 
+This document defines no means of preserving routes across a session
+failure, such as the graceful restart mechanism of BGP {{RFC4724}}, nor
+of asking a peer to re-send its routes without re-establishing the
+session. A transient transport failure therefore removes every route
+learned over the session, including those for contact windows far in the
+future, until a new session is established and the initial route
+exchange repeated. Speakers on links prone to interruption SHOULD set
+hold times accordingly. A mechanism for retaining routes across a brief
+interruption may be the subject of a future extension.
+
 An Initiator whose session has ended MAY establish a new one. It SHOULD
 wait before doing so, for an interval that increases with each successive
 failure to establish or keep a session with the same peer, so that a
@@ -734,10 +761,21 @@ promptly after an orderly `CEASE`.
 
 # Protocol Definition {#protocol-definition}
 
-This section defines the messages exchanged over a session, as Protocol
-Buffers {{PROTOBUF}} carried over a single bidirectional gRPC {{GRPC}}
-stream for the lifetime of the session. The sections that follow specify
-how the routing messages are processed.
+This section defines the messages exchanged over a session. They are
+written in the proto3 language of Protocol Buffers and encoded on the wire
+as specified in {{PROTOBUF}}; the encoding, not the language, is what an
+interoperating implementation must match. They are carried over a single
+bidirectional gRPC {{GRPC}} stream for the lifetime of the session. The
+sections that follow specify how the routing messages are processed.
+
+A speaker MUST be able to receive a `PeerMessage` of at least 4 MiB
+(4,194,304 bytes), the default limit in common gRPC implementations, and
+MUST NOT send one larger than that. A `RouteUpdate` whose announcements
+and withdrawals would exceed the limit MUST be split into several
+`RouteUpdate` messages; since each advertisement is complete in itself
+({{advertisement-id}}), a split has no effect on how the routes are
+processed, and only the last message of the initial route exchange
+carries `initial_update_complete` ({{initial-exchange}}).
 
 ## Service Definition
 
@@ -757,13 +795,11 @@ service DtnPeering {
 
 ~~~ protobuf
 message PeerMessage {
-  uint64 sequence_number = 1;
-  reserved 11, 12;
   oneof payload {
-    Hello hello = 10;
-    KeepAlive keep_alive = 20;
-    RouteUpdate update = 21;
-    Notification notification = 30;
+    Hello hello = 1;
+    KeepAlive keep_alive = 2;
+    RouteUpdate update = 3;
+    Notification notification = 4;
   }
 }
 ~~~
@@ -772,15 +808,15 @@ message PeerMessage {
 
 ~~~ protobuf
 message Hello {
-  // DNS Domain (e.g., "dsn.example.org")
-  string local_ad_id = 1;
-  // Optional, free-form (e.g., "goldstone-1")
-  string speaker_id = 2;
-  uint32 hold_time_seconds = 3;
   // Protocol version; 1 for this document
-  uint32 version = 4;
+  uint32 version = 1;
+  // DNS Domain (e.g., "dsn.example.org")
+  string local_ad_id = 2;
+  uint32 hold_time_seconds = 3;
   // Optional protocol extensions supported by the sender
-  repeated string capabilities = 5;
+  repeated string capabilities = 4;
+  // Optional, free-form (e.g., "goldstone-1")
+  string speaker_id = 5;
 }
 ~~~
 
@@ -825,28 +861,27 @@ message RouteUpdate {
 
 // One or more routes sharing the same attributes
 message RouteAdvertisement {
+  // Advertisement ID: identifies this advertisement within the
+  // session; re-sending the same id replaces the advertisement
+  uint64 id = 1;
+
   // Destination nodes; each pattern creates a route
-  repeated EidPattern patterns = 1;
+  repeated EidPattern patterns = 2;
 
   // Required attributes
   // AD Domains traversed, most recent first
-  repeated string ad_path = 2;
+  repeated string ad_path = 3;
   // Originating AD's preference (lower = preferred)
-  uint32 metric = 3;
+  uint32 metric = 4;
 
   // Optional attributes
-  repeated RouteAttribute attributes = 10;
-
-  // Advertisement ID: identifies this advertisement within the
-  // session; re-sending the same id replaces the advertisement
-  uint64 id = 11;
+  repeated RouteAttribute attributes = 5;
 }
 
 // Removes all routes created by the advertisements with the
 // listed advertisement IDs
 message RouteWithdrawal {
-  reserved 1, 2;
-  repeated uint64 advertisement_ids = 3;
+  repeated uint64 advertisement_ids = 1;
 }
 ~~~
 
@@ -855,7 +890,8 @@ message RouteWithdrawal {
 The semantics of each attribute are specified in {{routes}}.
 
 ~~~ protobuf
-// Optional route attribute; see Optional Attributes
+// Optional route attribute; see Optional Attributes. The field
+// number of each typed member is the attribute's registered type.
 message RouteAttribute {
   oneof attribute {
     // Bundle forwarding endpoint, for data plane separation
@@ -873,19 +909,34 @@ message RouteAttribute {
     // Estimated earliest delivery time at the destination
     google.protobuf.Timestamp arrival_time = 6;
 
-    // Forward compatibility: an attribute type this
-    // implementation does not define (see Forward Compatibility)
-    UnknownAttribute unknown = 255;
+    // Aggregated AD_PATH members; see Aggregation
+    AdSet ad_set = 7;
+
+    // An attribute carried by type number rather than as a
+    // typed member; see Attribute Types and Forward
+    // Compatibility
+    UnknownAttribute unknown = 65535;
   }
 }
 
-// For forward compatibility with future attribute types
 message UnknownAttribute {
-  uint32 type_id = 1;   // Identifies the attribute type
-  bytes value = 2;      // Opaque value
-  bool transitive = 3;  // If true, propagate even if not understood
+  uint32 type_id = 1;   // Registered attribute type
+  bytes value = 2;      // Encoding defined for the type
+  bool transitive = 3;  // Propagate even if not understood
+}
+
+// Unordered set of AD identities; see Aggregation
+message AdSet {
+  repeated string ad_ids = 1;
 }
 ~~~
+
+The `value` of an `UnknownAttribute` carrying one of the attribute types
+defined in this document is the Protocol Buffers encoding of the typed
+member's value: for `gateway_eid`, the UTF-8 string; for `valid_from`,
+`valid_until`, and `arrival_time`, the serialized
+`google.protobuf.Timestamp`; for `bandwidth_bps` and `max_bundle_size`,
+the varint; and for `ad_set`, the serialized `AdSet`.
 
 ## Data Types {#data-types}
 
@@ -1059,12 +1110,13 @@ Verification:
   AD.
 
 Detection:
-: If a DPP speaker receives an advertisement whose AD_PATH contains its
-  own `local_ad_id`, it MUST NOT create routes from it; the advertisement
-  is treated as a withdrawal of its ID ({{malformed}}).
+: If a DPP speaker receives an advertisement whose AD_PATH, or whose
+  AD_SET attribute if present ({{aggregation}}), contains its own
+  `local_ad_id`, it MUST NOT create routes from it; the advertisement is
+  treated as a withdrawal of its ID ({{malformed}}).
 
-AD identities in AD_PATH are DNS domain names, and MUST be compared
-case-insensitively.
+AD identities in AD_PATH and AD_SET are compared as described in
+{{architecture-ads}}.
 
 ## Optional Attributes
 
@@ -1079,27 +1131,82 @@ Optional attributes, each carried as a `RouteAttribute`
 | `arrival_time` | Estimated earliest delivery time at the destination (optional; see {{time-variant}}) |
 | `bandwidth_bps` | Rate at which the advertising AD accepts bundles, in bits per second |
 | `max_bundle_size` | Largest bundle the advertising AD accepts, in bytes |
+| `ad_set` | ADs traversed by routes that were aggregated into this one, beyond those in AD_PATH (see {{aggregation}}) |
 
 How each attribute is updated when a route is re-advertised is specified
 in {{readvertisement}}.
 
-## Forward Compatibility {#forward-compatibility}
+## Attribute Types and Forward Compatibility {#forward-compatibility}
 
-An attribute type that an implementation does not define is received as
-an `UnknownAttribute` ({{route-attributes}}), which carries the type, an
-opaque value, and a `transitive` flag. Implementations MUST handle it as
-follows:
+Every route attribute has a type, identified by a number in the "DPP Route
+Attribute Types" registry ({{iana-attributes}}). Each registered type
+records the protocol version ({{identity-message}}) that introduced it
+and the document that defines it. The attributes defined in this document
+are all introduced in version 1.
 
-1. If `transitive` is true: preserve the attribute and propagate it
-   unchanged when re-advertising the route.
-2. If `transitive` is false: discard the attribute, and do not propagate
-   it.
+A `RouteAttribute` ({{route-attributes}}) carries an attribute in one of
+two forms: as the typed member of the `attribute` choice defined for its
+type, or as an `UnknownAttribute`, which carries the type number, the
+attribute's value as an opaque byte string, and a `transitive` flag that
+tells a speaker which does not understand the type what to do with it. A
+sender MUST choose the form as follows:
 
-This allows intermediate DPP speakers to forward routes with attributes
-they do not understand, enabling incremental deployment of new attribute
-types.
+- An attribute whose type was introduced in a version that the peer
+  supports (that is, not later than the `version` in the peer's `Hello`)
+  MUST be sent in its typed form.
+- An attribute whose type was introduced in a later version than the peer
+  supports MUST be sent as an `UnknownAttribute`. Its `value` is the
+  encoding specified for that type in the document that defines it.
+- An attribute whose type is in the Private Use range of the registry
+  MUST always be sent as an `UnknownAttribute`.
+
+The second rule is what makes it possible for a speaker running an older
+version to carry a transitive attribute defined by a newer one: because
+Protocol Buffers does not deliver an unrecognized `oneof` member to the
+application, a newer typed member would otherwise be silently lost at the
+first older speaker on the path. The first rule is what allows speakers
+running the same version to use the typed, more compact and more
+convenient form between themselves.
+
+A receiving speaker MUST handle an `UnknownAttribute` as follows:
+
+1. If it recognizes the type, it MUST decode the `value` as specified for
+   that type and process the attribute exactly as if it had been received
+   in typed form.
+2. If it does not recognize the type and `transitive` is true, it MUST
+   preserve the attribute and propagate it, unchanged, as an
+   `UnknownAttribute` when re-advertising the route.
+3. If it does not recognize the type and `transitive` is false, it MUST
+   discard the attribute and not propagate it.
+
+The `transitive` flag exists only in `UnknownAttribute` form, and is
+meaningful only to a speaker that does not understand the attribute's
+type: it is all that such a speaker can know about the attribute. A
+speaker that does understand the type MUST handle the attribute as the
+document defining the type specifies, in particular when re-advertising a
+route ({{readvertisement}}), whether the attribute arrived in typed or
+`UnknownAttribute` form; and when it sends the attribute in
+`UnknownAttribute` form it MUST set the flag as that document specifies.
+For a Private Use type, the party using it chooses the flag. The flag is
+deliberately not recorded in the registry: knowing whether an attribute
+may be passed on unexamined is no substitute for knowing how it is to be
+processed, and for every attribute defined in this document except
+`ad_set` the correct behavior on re-advertisement is to replace or
+recompute the value, not to propagate it. A document that defines a new
+attribute type MUST specify its typed `RouteAttribute` member, the
+encoding of its `value` in `UnknownAttribute` form, the value of its
+`transitive` flag, and how a speaker that understands it treats it when a
+route is re-advertised.
 
 ## Time-Variant Routing {#time-variant}
+
+All times carried in DPP are absolute, and are compared across ADs. DPP
+speakers MUST therefore keep their clocks synchronized to UTC, for example
+using NTP. The time windows that DPP describes are typically measured in
+minutes or hours, so the accuracy that ordinary network time
+synchronization provides is sufficient; this document defines no
+tolerance for clock skew, and two times are equal only if they are
+identical.
 
 The `valid_from` and `valid_until` attributes allow an AD to advertise
 reachability that is available only at certain times, as is common in
@@ -1212,15 +1319,19 @@ A `RouteAdvertisement` is malformed if any of the following holds:
 - its AD_PATH is empty, or the first entry of its AD_PATH does not match
   the AD that the peer authenticated during session establishment
   ({{loop-detection}});
-- it carries more than one attribute of the same type, or more than one
-  `UnknownAttribute` with the same `type_id`;
+- it carries more than one attribute of the same type, whether in typed
+  or `UnknownAttribute` form, or an `UnknownAttribute` whose `type_id`
+  is 0, 65535, or that of a typed member the peer's version supports
+  ({{forward-compatibility}});
 - it carries both `valid_from` and `valid_until`, and `valid_until` is not
   later than `valid_from` ({{time-variant}});
 - it carries both `valid_from` and `arrival_time`, and `arrival_time` is
   earlier than `valid_from` ({{time-variant}});
 - its `gateway_eid` is not the administrative endpoint EID of a node, or
   is a LocalNode EID ({{gateway-eid-resolution}}); or
-- its `bandwidth_bps` or `max_bundle_size` is zero.
+- its `bandwidth_bps` or `max_bundle_size` is zero; or
+- its `ad_set` is empty, or contains an AD that also appears in its
+  AD_PATH.
 
 A pattern whose scheme the receiving speaker does not recognize (that is,
 an `EidPattern` in which no known scheme is set) is not malformed: the
@@ -1319,7 +1430,11 @@ This allows the following deployments:
 
 DNS-named gateway:
 : An AD with identity `dsn.example.org` that operates a gateway node named
-  `dtn://dsn.example.org/` need not include a `gateway_eid`.
+  `dtn://dsn.example.org/` need not include a `gateway_eid`. Since no
+  DNS-based procedure is currently specified for discovering the
+  convergence layer endpoints of a `dtn` node, the receiving AD must be
+  configured with how to reach that gateway; the default saves the
+  attribute, not the configuration.
 
 Separated control plane:
 : A DPP speaker that is not itself a gateway (e.g., a centralized route
@@ -1638,7 +1753,8 @@ Stage 1, choosing the originating AD:
 4. Shortest path to each origin: For each remaining AD, find the length of
    the shortest AD_PATH among its routes whose estimated delivery time is
    the time found in step 3. Keep only the ADs for which this length is
-   smallest.
+   smallest. Path length counts entries in AD_PATH only; members of an
+   `ad_set` attribute ({{aggregation}}) are not counted.
 
 5. Tie-break between origins: If more than one AD remains, choose the AD
    with the longest-held route among the routes considered in step 4; if
@@ -1721,6 +1837,12 @@ withdraw it independently when the routes it has selected change. The
 speaker MAY combine several patterns into one advertisement if they share
 the same time window and attributes.
 
+A speaker SHOULD NOT advertise to a peer a route whose AD_PATH, or whose
+AD_SET ({{aggregation}}), already contains that peer's AD. The peer would
+discard such a route as a loop ({{loop-detection}}), so advertising it
+only consumes capacity and causes needless processing, which matters on
+intermittent links.
+
 When deriving a re-advertised route from a selected route, the speaker
 MUST update its attributes as follows:
 
@@ -1787,11 +1909,77 @@ Bandwidth:
   later parts of the path, although sustained traffic in excess of those
   rates will eventually exhaust the AD's storage.
 
+AD_SET:
+: If the selected route carries an `ad_set` attribute, the speaker MUST
+  propagate it unchanged ({{aggregation}}).
+
 Unknown attributes:
 : The speaker MUST treat attributes that it does not understand as
   described in {{forward-compatibility}}. The definition of any new route
   attribute MUST specify how the attribute is treated when a route is
   re-advertised.
+
+## Aggregation {#aggregation}
+
+A speaker MAY aggregate: that is, in place of the routes it has selected
+for several patterns, it MAY advertise a single route whose pattern
+covers them all, so as to reduce the number of routes it advertises. For
+example, a speaker holding selected routes for `ipn:100.[0-3].*` and
+`ipn:100.[4-7].*` may advertise `ipn:100.[0-7].*`. An aggregate is
+derived from a set of selected routes, the component routes, as follows.
+
+Pattern:
+: The aggregate's pattern MUST satisfy {{pattern-constraints}} and MUST
+  cover every component route's pattern. A speaker MUST NOT advertise an
+  aggregate whose pattern matches any node for which it has no selected
+  route at any time within the aggregate's window: aggregating MUST NOT
+  claim reachability that the speaker does not have.
+
+AD_PATH and AD_SET:
+: The aggregate's AD_PATH is the longest common prefix of the component
+  routes' AD_PATHs, after the speaker has prepended its own AD to each
+  ({{loop-detection}}); since every component was received from some
+  peer, this prefix always contains at least the speaker's own AD. Every
+  AD that appears in any component's AD_PATH but not in that common
+  prefix MUST be placed in the aggregate's `ad_set` attribute, together
+  with the members of every component's own `ad_set`. AD_SET is an
+  unordered set, and is propagated unchanged by speakers that
+  re-advertise the aggregate. Loop detection considers both AD_PATH
+  and AD_SET ({{loop-detection}}). This is the role played by AS_SET in
+  BGP aggregation ({{Section 9.2.2.2 of RFC4271}}).
+
+Metric:
+: Component routes MUST have the same originating AD and the same metric;
+  routes that differ in either MUST NOT be aggregated together, since the
+  metric is compared only among routes from one originating AD
+  ({{metric}}). The aggregate carries that metric. The originating AD of
+  an aggregate is the last entry of its AD_PATH if the components share
+  one; if the common prefix is shorter than the components' AD_PATHs,
+  the originating AD is not recoverable from the aggregate, and speakers
+  receiving it MUST treat the last AD_PATH entry as the originating AD
+  for the purposes of {{route-selection}}.
+
+Time window and arrival time:
+: The aggregate's window is set as for any re-advertised route
+  ({{readvertisement}}), and MUST lie within the intersection of the
+  windows during which the speaker has a selected route for every node
+  the aggregate's pattern matches. If any component carries an
+  `arrival_time`, the aggregate MUST carry one that is not earlier than
+  the latest of them, since the aggregate claims delivery to every
+  component's nodes.
+
+Other attributes:
+: `gateway_eid`, `max_bundle_size`, and `bandwidth_bps` describe the
+  aggregating speaker's own AD and are set as for any re-advertised
+  route. Component routes whose values for these attributes the speaker
+  would set differently (for example, routes reached through different
+  gateways) SHOULD NOT be aggregated.
+
+Because AD_SET loses the order and the per-route composition of the
+component paths, path length comparison in {{route-selection}} counts
+AD_PATH entries only; an aggregate therefore appears no longer than its
+shortest component. Operators who prefer precise path information over
+smaller route tables can disable aggregation.
 
 
 # Security Considerations
@@ -1875,7 +2063,13 @@ expect.
 The AD_PATH verification in {{loop-detection}} ensures that the first entry
 in AD_PATH is the authenticated peer, but a receiving speaker cannot verify
 the remaining entries: a malicious peer can still add or remove ADs further
-along the path, including the originating AD.
+along the path, including the originating AD. Aggregation
+({{aggregation}}) widens this: because an aggregate's AD_PATH is only the
+common prefix of its components' paths, a transit AD can shorten the
+apparent path of a route by aggregating it, legitimately or otherwise, and
+so make it more attractive in selection. Operators who do not trust a peer
+to aggregate honestly can apply local preference to routes that carry an
+`ad_set`.
 
 Similarly, the metric is not protected. A malicious transit AD could lower
 the metric of routes it re-advertises, in violation of {{metric}}, and so
@@ -1969,6 +2163,35 @@ names that may appear in the `capabilities` field of the `Hello` message
 consist of lowercase ASCII letters, digits, and hyphens, and a reference.
 This document registers no names.
 
+## DPP Route Attribute Types Registry {#iana-attributes}
+
+This document requests the creation of a "DPP Route Attribute Types"
+registry. Each entry consists of a type number, a name, the protocol
+version that introduced it, and a reference to the document that defines
+it ({{forward-compatibility}}). The type number is also the field number
+of the attribute's typed member in `RouteAttribute`
+({{route-attributes}}).
+
+| Type | Name | Version | Reference |
+|------|------|---------|-----------|
+| 0 | Reserved | | This document |
+| 1 | gateway_eid | 1 | This document |
+| 2 | valid_from | 1 | This document |
+| 3 | valid_until | 1 | This document |
+| 4 | bandwidth_bps | 1 | This document |
+| 5 | max_bundle_size | 1 | This document |
+| 6 | arrival_time | 1 | This document |
+| 7 | ad_set | 1 | This document |
+| 8-61439 | Unassigned | | |
+| 61440-65534 | Private Use | | This document |
+| 65535 | Reserved (UnknownAttribute) | | This document |
+
+The registration policy for the Unassigned range is Specification
+Required ({{Section 4.6 of RFC8126}}). A specification requesting a type
+MUST provide the items listed in {{forward-compatibility}}. The registry
+does not record how an attribute is processed; that is defined by the
+referenced document.
+
 ## Future Considerations {#iana-future}
 
 This document does not request a port assignment. DPP uses port 50051 by
@@ -1976,9 +2199,6 @@ default ({{svcb-mapping}}), which is the port conventionally used by gRPC
 services and is not assigned to any protocol in the "Service Name and
 Transport Protocol Port Number Registry". Should a port be assigned for
 DPP by a later document, it would become the default.
-
-Future versions may additionally request establishment of a registry for
-DPP route attribute types.
 
 
 --- back
@@ -2153,8 +2373,6 @@ be accepted.
 
 # Acknowledgments
 {:numbered="false"}
-
-This document was developed as part of the Hardy BPv7 DTN Router project.
 
 The author thanks Erik Kline and Adam Wiethuechter for their reviews and
 comments.
